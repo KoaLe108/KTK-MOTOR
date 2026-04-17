@@ -162,6 +162,22 @@ router.get('/orders/customer/:cid', JwtUtil.checkToken, async function (req, res
   res.json(orders);
 });
 
+router.get('/orders', JwtUtil.checkToken, async function (req, res) {
+  const orders = await OrderDAO.selectAll();
+  res.json(orders);
+});
+
+router.put('/orders/:id/status', JwtUtil.checkToken, async function (req, res) {
+  const _id = req.params.id;
+  const status = req.body.status;
+  const result = await OrderDAO.updateStatus(_id, status);
+  if (result) {
+    res.json({ success: true, message: 'Order status updated', order: result });
+  } else {
+    res.status(404).json({ success: false, message: 'Order not found' });
+  }
+});
+
 function getRevenuePeriod(order, period) {
   const d = new Date(order.cdate);
   const year = d.getFullYear();

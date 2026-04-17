@@ -136,19 +136,9 @@ router.post('/checkout', JwtUtil.checkToken, async function (req, res) {
     const total = req.body.total;
     const items = req.body.items;
     const customer = req.body.customer;
-    const order = { cdate: now, total: total, status: 'Pending', customer: customer, items: items };
+    const order = { cdate: now, total: total, status: 'pending', customer: customer, items: items };
     const result = await OrderDAO.insert(order);
     res.json(result);
-});
-
-router.post('/orders/:id/complete', JwtUtil.checkToken, async function (req, res) {
-    const _id = req.params.id;
-    const result = await OrderDAO.updateStatus(_id, 'completed');
-    if (result) {
-        res.json({ success: true, message: 'Order marked as completed', order: result });
-    } else {
-        res.status(404).json({ success: false, message: 'Order not found' });
-    }
 });
 
 // myorders
