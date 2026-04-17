@@ -1,204 +1,294 @@
 import axios from 'axios';
 import React, { Component } from 'react';
+import { Form, Input, Button, Select, Upload, Image, message, Space, Spin, InputNumber } from 'antd';
+import { UploadOutlined, DeleteOutlined, SaveOutlined, PlusOutlined } from '@ant-design/icons';
 import MyContext from '../contexts/MyContext';
-import '../styles/general.css';
 
 class ProductDetail extends Component {
-    static contextType = MyContext; // using this.context to access global state
+    static contextType = MyContext;
+    formRef = React.createRef();
+
     constructor(props) {
         super(props);
         this.state = {
             categories: [],
-            txtID: '',
-            txtName: '',
-            txtPrice: 0,
-            cmbCategory: '',
             imgProduct: '',
+            loading: false,
+            isNew: !this.props.item?._id,
         };
     }
+
     render() {
-        const cates = this.state.categories.map((cate) => {
-            return (<option key={cate._id} value={cate._id}>{cate.name}</option>);
-        });
+        const categoryOptions = this.state.categories.map((cat) => ({
+            label: cat.name,
+            value: cat._id,
+        }));
+
         return (
-            <div className="product-detail-form">
-                <div style={{ position: 'relative' }}>
-                    <h2 className="text-center">PRODUCT DETAIL</h2>
-                    {this.props.onClose && (
-                        <button type="button" className="modal-close" onClick={this.props.onClose}>
-                            ×
-                        </button>
-                    )}
-                </div>
-                <form>
-                    <table>
-                        <tbody>
-                            <tr>
-                                <td>ID</td>
-                                <td><input type="text" value={this.state.txtID} onChange={(e) => { this.setState({ txtID: e.target.value }) }} readOnly={true} /></td>
-                            </tr>
-                            <tr>
-                                <td>Name</td>
-                                <td><input type="text" value={this.state.txtName} onChange={(e) => { this.setState({ txtName: e.target.value }) }} /></td>
-                            </tr>
-                            <tr>
-                                <td>Price</td>
-                                <td><input type="text" value={this.state.txtPrice} onChange={(e) => { this.setState({ txtPrice: e.target.value }) }} /></td>
-                            </tr>
-                            <tr>
-                                <td>Image</td>
-                                <td><input type="file" name="fileImage" accept="image/jpeg, image/png, image/gif" onChange={(e) => this.previewImage(e)} /></td>
-                            </tr>
-                            <tr>
-                                <td>Category</td>
-                                <td><select value={this.state.cmbCategory} onChange={(e) => { this.setState({ cmbCategory: e.target.value }) }}>{cates}</select></td>
-                            </tr>
-                            <tr>
-                                <td></td>
-                                <td>
-                                    <input type="submit" value="ADD NEW" onClick={(e) => this.btnAddClick(e)} />
-                                    <input type="submit" value="UPDATE" onClick={(e) => this.btnUpdateClick(e)} />
-                                    <input type="submit" className="delete-button" value="DELETE" onClick={(e) => this.btnDeleteClick(e)} />
-                                </td>
-                            </tr>
-                            <tr>
-                                <td colSpan="2"><img src={this.state.imgProduct} width="300px" height="300px" alt="" /></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </form>
-            </div>
+            <Spin spinning={this.state.loading}>
+                <Form
+                    ref={this.formRef}
+                    layout="vertical"
+                    onFinish={(values) => this.handleSubmit(values)}
+                    initialValues={{
+                        _id: this.props.item?._id || '',
+                        name: this.props.item?.name || '',
+                        price: this.props.item?.price || 0,
+                        category: this.props.item?.category?._id || '',
+                    }}
+                >
+                    <Form.Item
+                        label="Product ID"
+                        name="_id"
+                    >
+                        <Input disabled readOnly />
+                    </Form.Item>
+
+                    <Form.Item
+                        label="Product Name"
+                        name="name"
+                        rules={[{ required: true, message: 'Please enter product name' }]}
+                    >
+                        <Input placeholder="Enter product name" />
+                    </Form.Item>
+
+                    <Form.Item
+                        label="Price"
+                        name="price"
+                        rules={[{ required: true, message: 'Please enter price' }]}
+                    >
+                        <InputNumber
+                            style={{ width: '100%' }}
+                            min={0}
+                            placeholder="Enter price"
+                            prefix="$"
+                        />
+                    </Form.Item>
+
+                    <Form.Item
+                        label="Category"
+                        name="category"
+                        rules={[{ required: true, message: 'Please select category' }]}
+                    >
+                        <Select
+                            options={categoryOptions}
+                            placeholder="Select a category"
+                        />
+                    </Form.Item>
+
+                    <Form.Item label="Product Image">
+                        <Upload
+                            maxCount={1}
+                            accept="image/*"
+                            beforeUpload={(file) => {
+                                this.handleImageUpload(file);
+                                return false;
+                            }}
+                            listType="picture"
+                        >
+                            <Button icon={<UploadOutlined />}>
+                                Upload Image
+                            </Button>
+                        </Upload>
+                        {this.state.imgProduct && (
+                            <div style={{ marginTop: '16px' }}>
+                                <Image
+                                    width={200}
+                                    src={this.state.imgProduct}
+                                    alt="Product preview"
+                                />
+                            </div>
+                        )}
+                    </Form.Item>
+
+                    <Form.Item>
+                        <Space>
+                            {this.state.isNew ? (
+                                <Button
+                                    type="primary"
+                                    htmlType="submit"
+                                    icon={<PlusOutlined />}
+                                >
+                                    Add Product
+                                </Button>
+                            ) : (
+                                <>
+                                    <Button
+                                        type="primary"
+                                        htmlType="submit"
+                                        icon={<SaveOutlined />}
+                                    >
+                                        Update
+                                    </Button>
+                                    <Button
+                                        danger
+                                        icon={<DeleteOutlined />}
+                                        onClick={() => this.handleDelete()}
+                                    >
+                                        Delete
+                                    </Button>
+                                </>
+                            )}
+                        </Space>
+                    </Form.Item>
+                </Form>
+            </Spin>
         );
     }
+
     componentDidMount() {
         this.apiGetCategories();
-        if (this.props.item) {
+        if (this.props.item?.image) {
             this.setState({
-                txtID: this.props.item._id || '',
-                txtName: this.props.item.name || '',
-                txtPrice: this.props.item.price || 0,
-                cmbCategory: this.props.item.category ? this.props.item.category._id : '',
-                imgProduct: this.props.item.image ? 'data:image/jpg;base64,' + this.props.item.image : ''
+                imgProduct: 'data:image/jpg;base64,' + this.props.item.image,
+                isNew: !this.props.item._id,
             });
         }
     }
+
     componentDidUpdate(prevProps) {
         if (this.props.item !== prevProps.item) {
-            this.setState({
-                txtID: this.props.item ? this.props.item._id || '' : '',
-                txtName: this.props.item ? this.props.item.name || '' : '',
-                txtPrice: this.props.item ? this.props.item.price || 0 : 0,
-                cmbCategory: this.props.item && this.props.item.category ? this.props.item.category._id : '',
-                imgProduct: this.props.item && this.props.item.image ? 'data:image/jpg;base64,' + this.props.item.image : ''
+            if (this.props.item?.image) {
+                this.setState({
+                    imgProduct: 'data:image/jpg;base64,' + this.props.item.image,
+                    isNew: !this.props.item._id,
+                });
+            }
+            this.formRef.current?.setFieldsValue({
+                _id: this.props.item?._id || '',
+                name: this.props.item?.name || '',
+                price: this.props.item?.price || 0,
+                category: this.props.item?.category?._id || '',
             });
         }
     }
-    // event-handlers
-    btnAddClick(e) {
-        e.preventDefault();
-        const name = this.state.txtName;
-        const price = parseInt(this.state.txtPrice);
-        const category = this.state.cmbCategory;
-        const image = this.state.imgProduct.replace(/^data:image\/[a-z]+;base64,/, ''); // remove "data:image/...;base64,"
-        if (name && price && category && image) {
-            const prod = { name: name, price: price, category: category, image: image };
-            this.apiPostProduct(prod);
+
+    handleImageUpload(file) {
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+            this.setState({ imgProduct: evt.target.result });
+        };
+        reader.readAsDataURL(file);
+    }
+
+    handleSubmit(values) {
+        const image = this.state.imgProduct.replace(/^data:image\/[a-z]+;base64,/, '');
+
+        if (!image) {
+            message.error('Please upload an image');
+            return;
+        }
+
+        const product = {
+            name: values.name,
+            price: values.price,
+            category: values.category,
+            image: image,
+        };
+
+        if (this.state.isNew) {
+            this.apiPostProduct(product);
         } else {
-            alert('Please input name and price and category and image');
+            product.id = values._id;
+            this.apiPutProduct(product);
         }
     }
-    btnUpdateClick(e) {
-        e.preventDefault();
-        const id = this.state.txtID;
-        const name = this.state.txtName;
-        const price = parseInt(this.state.txtPrice);
-        const category = this.state.cmbCategory;
-        const image = this.state.imgProduct.replace(/^data:image\/[a-z]+;base64,/, ''); // remove "data:image/...;base64,"
-        if (id && name && price && category && image) {
-            const prod = { id: id, name: name, price: price, category: category, image: image };
-            this.apiPutProduct(prod);
-        } else {
-            alert('Please input id and name and price and category and image');
-        }
-    }
-    btnDeleteClick(e) {
-        e.preventDefault();
+
+    handleDelete() {
+        const id = this.props.item?._id;
         if (window.confirm('ARE YOU SURE?')) {
-            const id = this.state.txtID;
             if (id) {
                 this.apiDeleteProduct(id);
-            } else {
-                alert('Please input id');
             }
         }
     }
-    previewImage(e) {
-        const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (evt) => {
-                this.setState({ imgProduct: evt.target.result });
-            }
-            reader.readAsDataURL(file);
-        }
-    }
-    // apis
+
+    // APIs
     apiPostProduct(prod) {
+        this.setState({ loading: true });
         const config = { headers: { 'x-access-token': this.context.token } };
-        axios.post('/api/admin/products', prod, config).then((res) => {
-            const result = res.data;
-            if (result) {
-                alert('OK BABY!');
-                this.apiGetProducts();
-            } else {
-                alert('SORRY BABY!');
-            }
-        });
+        axios
+            .post('/api/admin/products', prod, config)
+            .then((res) => {
+                if (res.data) {
+                    message.success('Product added successfully!');
+                    this.apiGetProducts();
+                    this.props.onClose?.();
+                }
+            })
+            .catch((error) => {
+                message.error('Failed to add product: ' + (error.response?.data?.message || error.message));
+                this.setState({ loading: false });
+            });
     }
+
     apiPutProduct(prod) {
+        this.setState({ loading: true });
         const config = { headers: { 'x-access-token': this.context.token } };
-        axios.put('/api/admin/products', prod, config).then((res) => {
-            const result = res.data;
-            if (result) {
-                alert('OK BABY!');
-                this.apiGetProducts();
-            } else {
-                alert('SORRY BABY!');
-            }
-        });
+        axios
+            .put('/api/admin/products', prod, config)
+            .then((res) => {
+                if (res.data) {
+                    message.success('Product updated successfully!');
+                    this.apiGetProducts();
+                    this.props.onClose?.();
+                }
+            })
+            .catch((error) => {
+                message.error('Failed to update product: ' + (error.response?.data?.message || error.message));
+                this.setState({ loading: false });
+            });
     }
+
     apiDeleteProduct(id) {
+        this.setState({ loading: true });
         const config = { headers: { 'x-access-token': this.context.token } };
-        axios.delete('/api/admin/products/' + id, config).then((res) => {
-            const result = res.data;
-            if (result) {
-                alert('OK BABY!');
-                this.apiGetProducts();
-            } else {
-                alert('SORRY BABY!');
-            }
-        });
+        axios
+            .delete('/api/admin/products/' + id, config)
+            .then((res) => {
+                if (res.data) {
+                    message.success('Product deleted successfully!');
+                    this.apiGetProducts();
+                    this.props.onClose?.();
+                }
+            })
+            .catch((error) => {
+                message.error('Failed to delete product: ' + (error.response?.data?.message || error.message));
+                this.setState({ loading: false });
+            });
     }
+
     apiGetProducts() {
         const config = { headers: { 'x-access-token': this.context.token } };
-        axios.get('/api/admin/products?page=' + this.props.curPage, config).then((res) => {
-            const result = res.data;
-            if (result.products.length !== 0) {
-                this.props.updateProducts(result.products, result.noPages);
-            } else {
-                axios.get('/api/admin/products?page=' + (this.props.curPage - 1), config).then((res) => {
-                    const result = res.data;
+        axios
+            .get('/api/admin/products?page=' + this.props.curPage, config)
+            .then((res) => {
+                const result = res.data;
+                if (result.products.length !== 0) {
                     this.props.updateProducts(result.products, result.noPages);
-                });
-            }
-        });
+                } else {
+                    axios
+                        .get('/api/admin/products?page=' + (this.props.curPage - 1), config)
+                        .then((res) => {
+                            const result = res.data;
+                            this.props.updateProducts(result.products, result.noPages);
+                            this.setState({ loading: false });
+                        });
+                }
+            })
+            .catch(() => {
+                this.setState({ loading: false });
+            });
     }
+
     apiGetCategories() {
         const config = { headers: { 'x-access-token': this.context.token } };
-        axios.get('/api/admin/categories', config).then((res) => {
-            const result = res.data;
-            this.setState({ categories: result });
-        });
+        axios
+            .get('/api/admin/categories', config)
+            .then((res) => {
+                this.setState({ categories: res.data });
+            });
     }
 }
+
 export default ProductDetail;

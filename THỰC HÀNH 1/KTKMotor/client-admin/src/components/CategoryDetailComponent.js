@@ -1,64 +1,91 @@
 import axios from 'axios';
 import React, { Component } from 'react';
+import { Form, Input, Button, Space, message, Spin } from 'antd';
+import { SaveOutlined, DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 import MyContext from '../contexts/MyContext';
-import '../styles/general.css';
 
 class CategoryDetail extends Component {
-  static contextType = MyContext; // using this.context to access global state
+  static contextType = MyContext;
+  formRef = React.createRef();
+
   constructor(props) {
     super(props);
     this.state = {
-      txtID: '',
-      txtName: ''
+      loading: false,
+      isNew: !this.props.item?._id,
     };
   }
+
   render() {
     return (
-      <div className="category-detail-form">
-        <div style={{ position: 'relative' }}>
-          <h2 className="text-center">CATEGORY DETAIL</h2>
-          {this.props.onClose && (
-            <button type="button" className="modal-close" onClick={this.props.onClose}>
-              ×
-            </button>
-          )}
-        </div>
-        <form>
-          <table>
-            <tbody>
-              <tr>
-                <td>ID</td>
-                <td>
-                  <input type="text" value={this.state.txtID} onChange={(e) => { this.setState({ txtID: e.target.value }) }} readOnly={true} />
-                </td>
-              </tr>
-              <tr>
-                <td>Name</td>
-                <td>
-                  <input type="text" value={this.state.txtName} onChange={(e) => { this.setState({ txtName: e.target.value }) }} />
-                </td>
-              </tr>
-              <tr>
-                <td></td>
-                <td>
-                  <input type="submit" value="ADD NEW" onClick={(e) => this.btnAddClick(e)} />
-                  <input type="submit" value="UPDATE" onClick={(e) => this.btnUpdateClick(e)} />
-                  {/* THAY ĐỔI: Thêm sự kiện onClick cho nút DELETE */}
-                  <input type="submit" className="delete-button" value="DELETE" onClick={(e) => this.btnDeleteClick(e)} />
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </form>
-      </div>
+      <Spin spinning={this.state.loading}>
+        <Form
+          ref={this.formRef}
+          layout="vertical"
+          onFinish={(values) => this.handleSubmit(values)}
+          initialValues={{
+            _id: this.props.item?._id || '',
+            name: this.props.item?.name || '',
+          }}
+        >
+          <Form.Item
+            label="Category ID"
+            name="_id"
+          >
+            <Input disabled readOnly />
+          </Form.Item>
+
+          <Form.Item
+            label="Category Name"
+            name="name"
+            rules={[{ required: true, message: 'Please enter category name' }]}
+          >
+            <Input placeholder="Enter category name" />
+          </Form.Item>
+
+          <Form.Item>
+            <Space>
+              {this.state.isNew ? (
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  icon={<PlusOutlined />}
+                >
+                  Add Category
+                </Button>
+              ) : (
+                <>
+                  <Button
+                    type="primary"
+                    htmlType="submit"
+                    icon={<SaveOutlined />}
+                  >
+                    Update
+                  </Button>
+                  <Button
+                    danger
+                    icon={<DeleteOutlined />}
+                    onClick={() => this.handleDelete()}
+                  >
+                    Delete
+                  </Button>
+                </>
+              )}
+            </Space>
+          </Form.Item>
+        </Form>
+      </Spin>
     );
   }
 
   componentDidMount() {
     if (this.props.item) {
       this.setState({
-        txtID: this.props.item._id || '',
-        txtName: this.props.item.name || ''
+        isNew: !this.props.item._id,
+      });
+      this.formRef.current?.setFieldsValue({
+        _id: this.props.item._id || '',
+        name: this.props.item.name || '',
       });
     }
   }
@@ -66,96 +93,96 @@ class CategoryDetail extends Component {
   componentDidUpdate(prevProps) {
     if (this.props.item !== prevProps.item) {
       this.setState({
-        txtID: this.props.item ? this.props.item._id || '' : '',
-        txtName: this.props.item ? this.props.item.name || '' : ''
+        isNew: !this.props.item?._id,
+      });
+      this.formRef.current?.setFieldsValue({
+        _id: this.props.item?._id || '',
+        name: this.props.item?.name || '',
       });
     }
   }
 
-  // event-handlers
-  btnAddClick(e) {
-    e.preventDefault();
-    const name = this.state.txtName;
-    if (name) {
-      const cate = { name: name };
-      this.apiPostCategory(cate);
+  handleSubmit(values) {
+    if (this.state.isNew) {
+      this.apiPostCategory({ name: values.name });
     } else {
-      alert('Please input name');
+      this.apiPutCategory(values._id, { name: values.name });
     }
   }
 
-  btnUpdateClick(e) {
-    e.preventDefault();
-    const id = this.state.txtID;
-    const name = this.state.txtName;
-    if (id && name) {
-      const cate = { name: name };
-      this.apiPutCategory(id, cate);
-    } else {
-      alert('Please input id and name');
-    }
-  }
-
-  // THÊM MỚI: Xử lý sự kiện Delete
-  btnDeleteClick(e) {
-    e.preventDefault();
+  handleDelete() {
+    const id = this.props.item?._id;
     if (window.confirm('ARE YOU SURE?')) {
-      const id = this.state.txtID;
       if (id) {
         this.apiDeleteCategory(id);
-      } else {
-        alert('Please input id');
       }
     }
   }
 
-  // apis
+  // APIs
   apiPostCategory(cate) {
+    this.setState({ loading: true });
     const config = { headers: { 'x-access-token': this.context.token } };
-    axios.post('/api/admin/categories', cate, config).then((res) => {
-      const result = res.data;
-      if (result) {
-        alert('OK BABY!');
-        this.apiGetCategories();
-      } else {
-        alert('SORRY BABY!');
-      }
-    });
+    axios
+      .post('/api/admin/categories', cate, config)
+      .then((res) => {
+        if (res.data) {
+          message.success('Category added successfully!');
+          this.apiGetCategories();
+          this.props.onClose?.();
+        }
+      })
+      .catch((error) => {
+        message.error('Failed to add category: ' + (error.response?.data?.message || error.message));
+        this.setState({ loading: false });
+      });
   }
 
   apiPutCategory(id, cate) {
+    this.setState({ loading: true });
     const config = { headers: { 'x-access-token': this.context.token } };
-    axios.put('/api/admin/categories/' + id, cate, config).then((res) => {
-      const result = res.data;
-      if (result) {
-        alert('OK BABY!');
-        this.apiGetCategories();
-      } else {
-        alert('SORRY BABY!');
-      }
-    });
+    axios
+      .put('/api/admin/categories/' + id, cate, config)
+      .then((res) => {
+        if (res.data) {
+          message.success('Category updated successfully!');
+          this.apiGetCategories();
+          this.props.onClose?.();
+        }
+      })
+      .catch((error) => {
+        message.error('Failed to update category: ' + (error.response?.data?.message || error.message));
+        this.setState({ loading: false });
+      });
   }
 
-  // THÊM MỚI: Gọi API Delete
   apiDeleteCategory(id) {
+    this.setState({ loading: true });
     const config = { headers: { 'x-access-token': this.context.token } };
-    axios.delete('/api/admin/categories/' + id, config).then((res) => {
-      const result = res.data;
-      if (result) {
-        alert('OK BABY!');
-        this.apiGetCategories();
-      } else {
-        alert('SORRY BABY!');
-      }
-    });
+    axios
+      .delete('/api/admin/categories/' + id, config)
+      .then((res) => {
+        if (res.data) {
+          message.success('Category deleted successfully!');
+          this.apiGetCategories();
+          this.props.onClose?.();
+        }
+      })
+      .catch((error) => {
+        message.error('Failed to delete category: ' + (error.response?.data?.message || error.message));
+        this.setState({ loading: false });
+      });
   }
 
   apiGetCategories() {
     const config = { headers: { 'x-access-token': this.context.token } };
-    axios.get('/api/admin/categories', config).then((res) => {
-      const result = res.data;
-      this.props.updateCategories(result);
-    });
+    axios
+      .get('/api/admin/categories', config)
+      .then((res) => {
+        this.props.updateCategories(res.data);
+        this.setState({ loading: false });
+      });
   }
 }
+
 export default CategoryDetail;

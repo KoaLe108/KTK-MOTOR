@@ -1,185 +1,315 @@
-import axios from 'axios'; // [cite: 57]
-import React, { Component } from 'react'; // [cite: 58]
-import MyContext from '../contexts/MyContext'; // [cite: 59]
-import '../styles/general.css';
-import '../styles/datatable.css';
-import '../styles/customer.css';
+import axios from 'axios';
+import React, { Component } from 'react';
+import { Table, Button, Card, Tag, Space, Modal } from 'antd';
+import { MailOutlined, LockOutlined } from '@ant-design/icons';
+import MyContext from '../contexts/MyContext';
 
 class Customer extends Component {
-  static contextType = MyContext; // Truy cập global state [cite: 62]
-  
+  static contextType = MyContext;
+
   constructor(props) {
     super(props);
     this.state = {
-      customers: [], // [cite: 69]
-      orders: [],    // [cite: 71]
-      order: null    // [cite: 73]
+      customers: [],
+      orders: [],
+      order: null,
+      loading: false
     };
   }
 
   render() {
-    // Render danh sách khách hàng [cite: 90, 91]
-    const customers = this.state.customers.map((item) => {
-      return (
-        <tr key={item._id} className="datatable" onClick={() => this.trCustomerClick(item)}>
-          <td>{item._id}</td>
-          <td>{item.username}</td>
-          <td>{item.password}</td>
-          <td>{item.name}</td>
-          <td>{item.phone}</td>
-          <td>{item.email}</td>
-          <td>{item.active}</td>
-          <td>
-            {item.active === 0 ? (
-              <span className="link" onClick={() => this.lnkEmailClick(item)}>EMAIL</span> // [cite: 111, 562]
+    const customerColumns = [
+      {
+        title: 'ID',
+        dataIndex: '_id',
+        key: '_id',
+        width: '12%',
+        ellipsis: true,
+      },
+      {
+        title: 'Username',
+        dataIndex: 'username',
+        key: 'username',
+        width: '12%',
+      },
+      {
+        title: 'Name',
+        dataIndex: 'name',
+        key: 'name',
+        width: '15%',
+      },
+      {
+        title: 'Phone',
+        dataIndex: 'phone',
+        key: 'phone',
+        width: '12%',
+      },
+      {
+        title: 'Email',
+        dataIndex: 'email',
+        key: 'email',
+        width: '15%',
+      },
+      {
+        title: 'Active',
+        dataIndex: 'active',
+        key: 'active',
+        width: '8%',
+        render: (active) => {
+          const color = active === 1 ? 'green' : 'red';
+          const text = active === 1 ? 'Active' : 'Inactive';
+          return <Tag color={color}>{text}</Tag>;
+        },
+      },
+      {
+        title: 'Action',
+        key: 'action',
+        width: '26%',
+        render: (_, record) => (
+          <Space>
+            <Button
+              type="primary"
+              size="small"
+              onClick={() => this.trCustomerClick(record)}
+            >
+              View Orders
+            </Button>
+            {record.active === 0 ? (
+              <Button
+                type="default"
+                size="small"
+                icon={<MailOutlined />}
+                onClick={() => this.lnkEmailClick(record)}
+              >
+                Send Email
+              </Button>
             ) : (
-              <span className="link" onClick={() => this.lnkDeactiveClick(item)}>DEACTIVE</span> // [cite: 112, 446]
+              <Button
+                danger
+                size="small"
+                icon={<LockOutlined />}
+                onClick={() => this.lnkDeactiveClick(record)}
+              >
+                Deactive
+              </Button>
             )}
-          </td>
-        </tr>
-      );
-    });
+          </Space>
+        ),
+      },
+    ];
 
-    // Render danh sách đơn hàng của khách hàng được chọn [cite: 122, 124]
-    const orders = this.state.orders.map((item) => {
-      return (
-        <tr key={item._id} className="datatable" onClick={() => this.trOrderClick(item)}>
-          <td>{item._id}</td>
-          <td>{new Date(item.cdate).toLocaleString()}</td>
-          <td>{item.customer.name}</td>
-          <td>{item.customer.phone}</td>
-          <td>{item.total}</td>
-          <td>{item.status}</td>
-        </tr>
-      );
-    });
+    const orderColumns = [
+      {
+        title: 'ID',
+        dataIndex: '_id',
+        key: '_id',
+        width: '15%',
+        ellipsis: true,
+      },
+      {
+        title: 'Date',
+        dataIndex: 'cdate',
+        key: 'cdate',
+        width: '15%',
+        render: (date) => new Date(date).toLocaleDateString(),
+      },
+      {
+        title: 'Total',
+        dataIndex: 'total',
+        key: 'total',
+        width: '12%',
+        render: (total) => <span>${total}</span>,
+      },
+      {
+        title: 'Status',
+        dataIndex: 'status',
+        key: 'status',
+        width: '12%',
+        render: (status) => {
+          const color = status === 'completed' ? 'green' : 'orange';
+          return <Tag color={color}>{status}</Tag>;
+        },
+      },
+      {
+        title: 'Action',
+        key: 'action',
+        width: '16%',
+        render: (_, record) => (
+          <Button
+            type="link"
+            onClick={() => this.setState({ order: record })}
+          >
+            View Detail
+          </Button>
+        ),
+      },
+    ];
 
-    // Render chi tiết một đơn hàng [cite: 144, 146]
-    let items = null;
-    if (this.state.order) {
-      items = this.state.order.items.map((item, index) => {
-        return (
-          <tr key={item.product._id} className="datatable">
-            <td>{index + 1}</td>
-            <td>{item.product._id}</td>
-            <td>{item.product.name}</td>
-            <td><img src={"data:image/jpg;base64," + item.product.image} width="70px" height="70px" alt="" /></td>
-            <td>{item.product.price}</td>
-            <td>{item.quantity}</td>
-            <td>{item.product.price * item.quantity}</td>
-          </tr>
-        );
-      });
-    }
+    const itemColumns = [
+      {
+        title: 'No.',
+        key: 'index',
+        width: '8%',
+        render: (_, __, index) => index + 1,
+      },
+      {
+        title: 'Product ID',
+        dataIndex: ['product', '_id'],
+        key: '_id',
+        width: '15%',
+        ellipsis: true,
+      },
+      {
+        title: 'Product Name',
+        dataIndex: ['product', 'name'],
+        key: 'name',
+        width: '15%',
+      },
+      {
+        title: 'Image',
+        dataIndex: ['product', 'image'],
+        key: 'image',
+        width: '10%',
+        render: (image) => (
+          <img
+            src={"data:image/jpg;base64," + image}
+            alt="product"
+            style={{ width: '50px', height: '50px', objectFit: 'cover' }}
+          />
+        ),
+      },
+      {
+        title: 'Price',
+        dataIndex: ['product', 'price'],
+        key: 'price',
+        width: '12%',
+        render: (price) => <span>${price}</span>,
+      },
+      {
+        title: 'Quantity',
+        dataIndex: 'quantity',
+        key: 'quantity',
+        width: '10%',
+      },
+      {
+        title: 'Amount',
+        key: 'amount',
+        width: '12%',
+        render: (_, record) => (
+          <span>${(record.product.price * record.quantity).toFixed(2)}</span>
+        ),
+      },
+    ];
 
     return (
-      <div className="customer-page">
-        <div className="customer-header">
-          <div>
-            <h2>CUSTOMER MANAGEMENT</h2>
-            <p className="customer-subtitle">Quản lý khách hàng và theo dõi đơn hàng trong hệ thống bán xe máy.</p>
-          </div>
-        </div>
+      <div>
+        <Card title="Customer Management" style={{ marginBottom: '24px' }}>
+          <Table
+            columns={customerColumns}
+            dataSource={this.state.customers.map((item) => ({
+              ...item,
+              key: item._id,
+            }))}
+            loading={this.state.loading}
+            pagination={{ pageSize: 10 }}
+            scroll={{ x: 1200 }}
+          />
+        </Card>
 
-        <div className="customer-table-container">
-          <table className="customer-table" border="1">
-            <tbody>
-              <tr>
-                <th>ID</th><th>Username</th><th>Password</th><th>Name</th>
-                <th>Phone</th><th>Email</th><th>Active</th><th>Action</th>
-              </tr>
-              {customers}
-            </tbody>
-          </table>
-        </div>
+        {this.state.orders.length > 0 && (
+          <Card title="Customer Orders" style={{ marginBottom: '24px' }}>
+            <Table
+              columns={orderColumns}
+              dataSource={this.state.orders.map((item) => ({
+                ...item,
+                key: item._id,
+              }))}
+              pagination={false}
+              scroll={{ x: 800 }}
+            />
+          </Card>
+        )}
 
-        {this.state.orders.length > 0 ? (
-          <div className="customer-table-container">
-            <h2>ORDER LIST</h2>
-            <table className="customer-table" border="1">
-              <tbody>
-                <tr>
-                  <th>ID</th><th>Creation date</th><th>Cust.name</th>
-                  <th>Cust.phone</th><th>Total</th><th>Status</th>
-                </tr>
-                {orders}
-              </tbody>
-            </table>
-          </div>
-        ) : <div />}
-
-        {this.state.order ? (
-          <div className="customer-table-container customer-detail-card">
-            <h2>ORDER DETAIL</h2>
-            <table className="customer-table" border="1">
-              <tbody>
-                <tr>
-                  <th>No.</th><th>Prod. ID</th><th>Prod.name</th><th>Image</th>
-                  <th>Price</th><th>Quantity</th><th>Amount</th>
-                </tr>
-                {items}
-              </tbody>
-            </table>
-          </div>
-        ) : <div />}
+        {this.state.order && (
+          <Card title={`Order Detail - ${this.state.order._id}`}>
+            <Table
+              columns={itemColumns}
+              dataSource={this.state.order.items?.map((item) => ({
+                ...item,
+                key: item.product._id,
+              })) || []}
+              pagination={false}
+              scroll={{ x: 900 }}
+            />
+            <div style={{ marginTop: '16px', textAlign: 'right' }}>
+              <strong>Total: ${this.state.order.total}</strong>
+            </div>
+          </Card>
+        )}
       </div>
     );
   }
 
   componentDidMount() {
-    this.apiGetCustomers(); // [cite: 302]
+    this.apiGetCustomers();
   }
 
   // Event-handlers
   trCustomerClick(item) {
-    this.setState({ orders: [], order: null }); // [cite: 332]
-    this.apiGetOrdersByCustID(item._id); // [cite: 333]
-  }
-
-  trOrderClick(item) {
-    this.setState({ order: item }); // [cite: 335]
+    this.setState({ orders: [], order: null });
+    this.apiGetOrdersByCustID(item._id);
   }
 
   lnkDeactiveClick(item) {
-    this.apiPutCustomerDeactive(item._id, item.token); // [cite: 447]
+    this.apiPutCustomerDeactive(item._id, item.token);
   }
 
   lnkEmailClick(item) {
-    this.apiGetCustomerSendmail(item._id); // [cite: 600]
+    this.apiGetCustomerSendmail(item._id);
   }
 
   // APIs
   apiGetCustomers() {
-    const config = { headers: { 'x-access-token': this.context.token } }; // [cite: 338]
-    axios.get('/api/admin/customers', config).then((res) => {
-      this.setState({ customers: res.data }); // [cite: 340]
-    });
+    this.setState({ loading: true });
+    const config = { headers: { 'x-access-token': this.context.token } };
+    axios
+      .get('/api/admin/customers', config)
+      .then((res) => {
+        this.setState({ customers: res.data, loading: false });
+      })
+      .catch(() => {
+        this.setState({ loading: false });
+      });
   }
 
   apiGetOrdersByCustID(cid) {
-    const config = { headers: { 'x-access-token': this.context.token } }; // [cite: 342]
+    const config = { headers: { 'x-access-token': this.context.token } };
     axios.get('/api/admin/orders/customer/' + cid, config).then((res) => {
-      this.setState({ orders: res.data }); // [cite: 344]
+      this.setState({ orders: res.data });
     });
   }
 
   apiPutCustomerDeactive(id, token) {
-    const body = { token: token }; // [cite: 493]
-    const config = { headers: { 'x-access-token': this.context.token } }; // [cite: 494]
+    const body = { token: token };
+    const config = { headers: { 'x-access-token': this.context.token } };
     axios.put('/api/admin/customers/deactive/' + id, body, config).then((res) => {
       if (res.data) {
-        this.apiGetCustomers(); // [cite: 498]
-      } else {
-        alert('SORRY BABY!'); // [cite: 500]
+        this.apiGetCustomers();
       }
     });
   }
 
   apiGetCustomerSendmail(id) {
-    const config = { headers: { 'x-access-token': this.context.token } }; // [cite: 603]
-    axios.get('/api/admin/customers/sendmail/' + id, config).then((res) => {
-      alert(res.data.message); // [cite: 605]
-    });
+    const config = { headers: { 'x-access-token': this.context.token } };
+    axios
+      .get('/api/admin/customers/sendmail/' + id, config)
+      .then((res) => {
+        Modal.success({
+          title: 'Email Sent',
+          content: res.data.message,
+        });
+      });
   }
 }
-export default Customer; // [cite: 350]
+
+export default Customer;

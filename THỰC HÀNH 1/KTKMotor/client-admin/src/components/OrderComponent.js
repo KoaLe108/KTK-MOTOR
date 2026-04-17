@@ -1,5 +1,7 @@
 import axios from 'axios';
 import React, { Component } from 'react';
+import { Table, Button, Card, Tag, Space } from 'antd';
+import { CheckOutlined } from '@ant-design/icons';
 import MyContext from '../contexts/MyContext';
 
 class Order extends Component {
@@ -9,76 +11,171 @@ class Order extends Component {
     super(props);
     this.state = {
       orders: [],
-      order: null
+      order: null,
+      loading: false
     };
   }
 
   render() {
-    const orders = this.state.orders.map((item) => {
-      return (
-        <tr key={item._id} className="datatable" onClick={() => this.trOrderClick(item)}>
-          <td>{item._id}</td>
-          <td>{new Date(item.cdate).toLocaleString()}</td>
-          <td>{item.customer.name}</td>
-          <td>{item.customer.phone}</td>
-          <td>{item.total}</td>
-          <td>{item.status}</td>
-          <td>
-            {item.status !== 'completed' ? (
-              <span className="link" onClick={(e) => { e.stopPropagation(); this.lnkConfirmClick(item._id); }}>CONFIRM</span>
-            ) : (
-              <span>Completed</span>
+    const orderColumns = [
+      {
+        title: 'ID',
+        dataIndex: '_id',
+        key: '_id',
+        width: '15%',
+        ellipsis: true,
+      },
+      {
+        title: 'Creation Date',
+        dataIndex: 'cdate',
+        key: 'cdate',
+        width: '15%',
+        render: (date) => new Date(date).toLocaleDateString(),
+      },
+      {
+        title: 'Customer Name',
+        dataIndex: ['customer', 'name'],
+        key: 'customerName',
+        width: '12%',
+      },
+      {
+        title: 'Phone',
+        dataIndex: ['customer', 'phone'],
+        key: 'phone',
+        width: '12%',
+      },
+      {
+        title: 'Total',
+        dataIndex: 'total',
+        key: 'total',
+        width: '10%',
+        render: (total) => <span>${total}</span>,
+      },
+      {
+        title: 'Status',
+        dataIndex: 'status',
+        key: 'status',
+        width: '10%',
+        render: (status) => {
+          const color = status === 'completed' ? 'green' : 'orange';
+          return <Tag color={color}>{status}</Tag>;
+        },
+      },
+      {
+        title: 'Action',
+        key: 'action',
+        width: '16%',
+        render: (_, record) => (
+          <Space>
+            {record.status !== 'completed' && (
+              <Button
+                type="primary"
+                size="small"
+                icon={<CheckOutlined />}
+                onClick={() => this.handleConfirm(record._id)}
+              >
+                Confirm
+              </Button>
             )}
-          </td>
-        </tr>
-      );
-    });
+            <Button
+              type="default"
+              size="small"
+              onClick={() => this.setState({ order: record })}
+            >
+              View Detail
+            </Button>
+          </Space>
+        ),
+      },
+    ];
 
-    let items = null;
-    if (this.state.order) {
-      items = this.state.order.items.map((item, index) => {
-        return (
-          <tr key={item.product._id} className="datatable">
-            <td>{index + 1}</td>
-            <td>{item.product._id}</td>
-            <td>{item.product.name}</td>
-            <td><img src={"data:image/jpg;base64," + item.product.image} width="70px" height="70px" alt="" /></td>
-            <td>{item.product.price}</td>
-            <td>{item.quantity}</td>
-            <td>{item.product.price * item.quantity}</td>
-          </tr>
-        );
-      });
-    }
+    const itemColumns = [
+      {
+        title: 'No.',
+        key: 'index',
+        width: '8%',
+        render: (_, __, index) => index + 1,
+      },
+      {
+        title: 'Product ID',
+        dataIndex: ['product', '_id'],
+        key: '_id',
+        width: '15%',
+        ellipsis: true,
+      },
+      {
+        title: 'Product Name',
+        dataIndex: ['product', 'name'],
+        key: 'name',
+        width: '15%',
+      },
+      {
+        title: 'Image',
+        dataIndex: ['product', 'image'],
+        key: 'image',
+        width: '10%',
+        render: (image) => (
+          <img
+            src={"data:image/jpg;base64," + image}
+            alt="product"
+            style={{ width: '50px', height: '50px', objectFit: 'cover' }}
+          />
+        ),
+      },
+      {
+        title: 'Price',
+        dataIndex: ['product', 'price'],
+        key: 'price',
+        width: '12%',
+        render: (price) => <span>${price}</span>,
+      },
+      {
+        title: 'Quantity',
+        dataIndex: 'quantity',
+        key: 'quantity',
+        width: '10%',
+      },
+      {
+        title: 'Amount',
+        key: 'amount',
+        width: '12%',
+        render: (_, record) => (
+          <span>${(record.product.price * record.quantity).toFixed(2)}</span>
+        ),
+      },
+    ];
 
     return (
       <div>
-        <div className="align-center">
-          <h2 className="text-center">ORDER LIST</h2>
-          <table className="datatable" border="1">
-            <tbody>
-              <tr className="datatable">
-                <th>ID</th><th>Creation date</th><th>Cust.name</th>
-                <th>Cust.phone</th><th>Total</th><th>Status</th><th>Action</th>
-              </tr>
-              {orders}
-            </tbody>
-          </table>
-        </div>
-        {this.state.order ? (
-          <div className="align-center">
-            <h2 className="text-center">ORDER DETAIL</h2>
-            <table className="datatable" border="1">
-              <tbody>
-                <tr className="datatable">
-                  <th>No.</th><th>Prod. ID</th><th>Prod.name</th><th>Image</th>
-                  <th>Price</th><th>Quantity</th><th>Amount</th>
-                </tr>
-                {items}
-              </tbody>
-            </table>
-          </div>
-        ) : <div />}
+        <Card title="Order Management" style={{ marginBottom: '24px' }}>
+          <Table
+            columns={orderColumns}
+            dataSource={this.state.orders.map((item) => ({
+              ...item,
+              key: item._id,
+            }))}
+            loading={this.state.loading}
+            pagination={{ pageSize: 10 }}
+            scroll={{ x: 1000 }}
+          />
+        </Card>
+
+        {this.state.order && (
+          <Card title={`Order Detail - ${this.state.order._id}`}>
+            <Table
+              columns={itemColumns}
+              dataSource={this.state.order.items?.map((item, index) => ({
+                ...item,
+                key: item.product._id,
+              })) || []}
+              pagination={false}
+              scroll={{ x: 800 }}
+            />
+            <div style={{ marginTop: '16px', textAlign: 'right' }}>
+              <strong>Total: ${this.state.order.total}</strong>
+            </div>
+          </Card>
+        )}
       </div>
     );
   }
@@ -87,34 +184,36 @@ class Order extends Component {
     this.apiGetOrders();
   }
 
-  trOrderClick(item) {
-    this.setState({ order: item });
-  }
-
-  lnkConfirmClick(id) {
+  handleConfirm(id) {
     if (window.confirm('Are you sure to confirm this order?')) {
       this.apiPutOrderStatus(id, 'completed');
     }
   }
 
   apiGetOrders() {
+    this.setState({ loading: true });
     const config = { headers: { 'x-access-token': this.context.token } };
-    axios.get('/api/admin/orders', config).then((res) => {
-      this.setState({ orders: res.data });
-    });
+    axios
+      .get('/api/admin/orders', config)
+      .then((res) => {
+        this.setState({ orders: res.data, loading: false });
+      })
+      .catch(() => {
+        this.setState({ loading: false });
+      });
   }
 
   apiPutOrderStatus(id, status) {
     const body = { status: status };
     const config = { headers: { 'x-access-token': this.context.token } };
-    axios.put('/api/admin/orders/' + id + '/status', body, config).then((res) => {
-      if (res.data.success) {
-        alert('Order confirmed!');
-        this.apiGetOrders(); // Refresh the list
-      } else {
-        alert('Failed to confirm order');
-      }
-    });
+    axios
+      .put('/api/admin/orders/' + id + '/status', body, config)
+      .then((res) => {
+        if (res.data.success) {
+          this.apiGetOrders();
+        }
+      });
   }
 }
+
 export default Order;

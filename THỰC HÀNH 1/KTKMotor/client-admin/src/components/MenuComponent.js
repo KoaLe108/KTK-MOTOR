@@ -1,35 +1,95 @@
 import React, { Component } from 'react';
+import { Layout, Menu, Button, Space, Avatar } from 'antd';
+import { LogoutOutlined, DashboardOutlined, ShoppingOutlined, AppstoreOutlined, UnorderedListOutlined, UserOutlined } from '@ant-design/icons';
+import { Link, useNavigate } from 'react-router-dom';
 import MyContext from '../contexts/MyContext';
-import '../styles/general.css';
-import '../styles/menu.css';
-import { Link } from 'react-router-dom';
 
-class Menu extends Component {
-  static contextType = MyContext; // using this.context to access global state
-  render() {
-    return (
-      <div className="border-bottom">
-        <div className="float-left">
-          <ul className="menu">
-            <li className="menu"><Link to='/admin/home'>Home</Link></li>
-            <li className="menu"><Link to='/admin/category'>Category</Link></li>
-            <li className="menu"><Link to='/admin/product'>Product</Link></li>
-            <li className="menu"><Link to='/admin/order'>Order</Link></li>
-            <li className="menu"><Link to='/admin/customer'>Customer</Link></li>
-            <li className="menu"><Link to='/admin/dashboard'>Dashboard</Link></li>
-          </ul>
-        </div>
-        <div className="float-right">
-          Hello <b>{this.context.username}</b> | <Link to='/admin/home' onClick={() => this.lnkLogoutClick()}>Logout</Link>
-        </div>
-        <div className="float-clear" />
-      </div>
-    );
-  }
-  // event-handlers
-  lnkLogoutClick() {
-    this.context.setToken('');
-    this.context.setUsername('');
-  }
-}
-export default Menu;
+const MenuComponent = (props) => {
+  const context = React.useContext(MyContext);
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    context.setToken('');
+    context.setUsername('');
+    navigate('/');
+  };
+
+  const menuItems = [
+    {
+      key: 'home',
+      icon: <DashboardOutlined />,
+      label: 'Home',
+      onClick: () => navigate('/admin/home'),
+    },
+    {
+      key: 'category',
+      icon: <AppstoreOutlined />,
+      label: 'Category',
+      onClick: () => navigate('/admin/category'),
+    },
+    {
+      key: 'product',
+      icon: <ShoppingOutlined />,
+      label: 'Product',
+      onClick: () => navigate('/admin/product'),
+    },
+    {
+      key: 'order',
+      icon: <UnorderedListOutlined />,
+      label: 'Order',
+      onClick: () => navigate('/admin/order'),
+    },
+    {
+      key: 'customer',
+      icon: <UserOutlined />,
+      label: 'Customer',
+      onClick: () => navigate('/admin/customer'),
+    },
+    {
+      key: 'dashboard',
+      icon: <DashboardOutlined />,
+      label: 'Dashboard',
+      onClick: () => navigate('/admin/dashboard'),
+    },
+  ];
+
+  return (
+    <Layout.Header
+      style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        background: '#001529',
+        paddingLeft: '50px',
+        paddingRight: '50px',
+      }}
+    >
+      <Menu
+        mode="horizontal"
+        items={menuItems}
+        style={{
+          flex: 1,
+          minWidth: 0,
+          background: 'transparent',
+        }}
+        theme="dark"
+      />
+      <Space size="large">
+        <span style={{ color: 'white', fontSize: '14px' }}>
+          <Avatar size="small" icon={<UserOutlined />} />
+          {' '}{context.username}
+        </span>
+        <Button
+          type="primary"
+          danger
+          icon={<LogoutOutlined />}
+          onClick={handleLogout}
+        >
+          Logout
+        </Button>
+      </Space>
+    </Layout.Header>
+  );
+};
+
+export default MenuComponent;

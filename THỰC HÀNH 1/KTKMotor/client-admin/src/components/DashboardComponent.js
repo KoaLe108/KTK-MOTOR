@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
 import axios from 'axios';
+import { Card, Row, Col, Button, Spin, Table, message } from 'antd';
+import { FilePdfOutlined } from '@ant-design/icons';
 import MyContext from '../contexts/MyContext';
 import { Bar, Line } from 'react-chartjs-2';
-import '../styles/general.css';
-import '../styles/dashboard.css';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -63,45 +63,54 @@ class Dashboard extends Component {
   }
 
   async exportToPdf() {
-    if (!this.dashboardRef.current) return;
-    const element = this.dashboardRef.current;
-    const canvas = await html2canvas(element, { scale: 2, useCORS: true });
-    const imgData = canvas.toDataURL('image/png');
-    const pdf = new jsPDF('p', 'mm', 'a4');
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeight = pdf.internal.pageSize.getHeight();
-    const imgProps = pdf.getImageProperties(imgData);
-    const imgWidth = pageWidth - 20;
-    const imgHeight = (imgProps.height * imgWidth) / imgProps.width;
-    let position = 10;
-
-    // Thêm tiêu đề báo cáo
-    pdf.setFontSize(20);
-    pdf.text('KTK Motor - Báo cáo Dashboard', 10, 20);
-    pdf.setFontSize(12);
-    const currentDate = new Date().toLocaleDateString('vi-VN');
-    pdf.text(`Ngày xuất: ${currentDate}`, 10, 30);
-    position = 40; // Điều chỉnh vị trí bắt đầu nội dung
-
-    if (imgHeight < pageHeight - position) {
-      pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
-    } else {
-      const ratio = (pageWidth - 20) / imgProps.width;
-      const totalPages = Math.ceil((imgProps.height * ratio) / (pageHeight - position));
-      for (let page = 0; page < totalPages; page += 1) {
-        const sourceY = page * (pageHeight - position) / ratio;
-        const pageCanvas = document.createElement('canvas');
-        pageCanvas.width = canvas.width;
-        pageCanvas.height = Math.min(canvas.height - sourceY, (pageHeight - position) / ratio);
-        const ctx = pageCanvas.getContext('2d');
-        ctx.drawImage(canvas, 0, -sourceY, canvas.width, canvas.height);
-        const pageImgData = pageCanvas.toDataURL('image/png');
-        if (page > 0) pdf.addPage();
-        pdf.addImage(pageImgData, 'PNG', 10, page === 0 ? position : 10, imgWidth, Math.min(imgHeight, pageHeight - (page === 0 ? position : 10)));
-      }
+    if (!this.dashboardRef.current) {
+      message.error('Dashboard not ready for export');
+      return;
     }
 
-    pdf.save('dashboard-report.pdf');
+    try {
+      const element = this.dashboardRef.current;
+      const canvas = await html2canvas(element, { scale: 2, useCORS: true });
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const imgProps = pdf.getImageProperties(imgData);
+      const imgWidth = pageWidth - 20;
+      const imgHeight = (imgProps.height * imgWidth) / imgProps.width;
+      let position = 10;
+
+      pdf.setFontSize(20);
+      pdf.text('KTK Motor - Báo cáo Dashboard', 10, 20);
+      pdf.setFontSize(12);
+      const currentDate = new Date().toLocaleDateString('vi-VN');
+      pdf.text(`Ngày xuất: ${currentDate}`, 10, 30);
+      position = 40;
+
+      if (imgHeight < pageHeight - position) {
+        pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+      } else {
+        const ratio = (pageWidth - 20) / imgProps.width;
+        const totalPages = Math.ceil((imgProps.height * ratio) / (pageHeight - position));
+        for (let page = 0; page < totalPages; page += 1) {
+          const sourceY = page * (pageHeight - position) / ratio;
+          const pageCanvas = document.createElement('canvas');
+          pageCanvas.width = canvas.width;
+          pageCanvas.height = Math.min(canvas.height - sourceY, (pageHeight - position) / ratio);
+          const ctx = pageCanvas.getContext('2d');
+          ctx.drawImage(canvas, 0, -sourceY, canvas.width, canvas.height);
+          const pageImgData = pageCanvas.toDataURL('image/png');
+          if (page > 0) pdf.addPage();
+          pdf.addImage(pageImgData, 'PNG', 10, page === 0 ? position : 10, imgWidth, Math.min(imgHeight, pageHeight - (page === 0 ? position : 10)));
+        }
+      }
+
+      pdf.save('dashboard-report.pdf');
+      message.success('Dashboard exported successfully!');
+    } catch (error) {
+      console.error('PDF export error:', error);
+      message.error('Failed to export PDF');
+    }
   }
 
   buildChartData(revenue, label, color) {
@@ -123,81 +132,117 @@ class Dashboard extends Component {
 
   render() {
     const { revenue, newestProducts, topProducts, loading, error } = this.state;
-    const monthData = this.buildChartData(revenue.month, 'Doanh thu theo tháng', 'rgba(54, 162, 235, 0.7)');
-    const quarterData = this.buildChartData(revenue.quarter, 'Doanh thu theo quý', 'rgba(75, 192, 192, 0.7)');
-    const yearData = this.buildChartData(revenue.year, 'Doanh thu theo năm', 'rgba(255, 159, 64, 0.7)');
+    const monthData = this.buildChartData(revenue.month, 'Monthly Revenue', 'rgba(54, 162, 235, 0.7)');
+    const quarterData = this.buildChartData(revenue.quarter, 'Quarterly Revenue', 'rgba(75, 192, 192, 0.7)');
+    const yearData = this.buildChartData(revenue.year, 'Yearly Revenue', 'rgba(255, 159, 64, 0.7)');
 
     const chartOptions = {
       responsive: true,
+      maintainAspectRatio: true,
       plugins: {
         legend: { position: 'top' },
-        title: { display: true, text: 'Báo cáo doanh thu' }
+        title: { display: false }
       },
       scales: {
         y: {
           beginAtZero: true,
           ticks: {
-            callback: value => value.toLocaleString()
+            callback: value => '$' + value.toLocaleString()
           }
         }
       }
     };
 
+    const productColumns = [
+      {
+        title: 'Product Name',
+        dataIndex: 'name',
+        key: 'name',
+      },
+      {
+        title: 'Price',
+        dataIndex: 'price',
+        key: 'price',
+        render: (price) => <span>${Number(price).toLocaleString()}</span>,
+      },
+    ];
+
     return (
-      <div ref={this.dashboardRef}>
-        <h2 className="text-center">ADMIN DASHBOARD</h2>
+      <Spin spinning={loading}>
+        <div ref={this.dashboardRef}>
+          <Row gutter={[16, 16]} style={{ marginBottom: '24px' }}>
+            <Col xs={24} sm={24} md={24} lg={24}>
+              <Card
+                title="Admin Dashboard"
+                extra={
+                  <Button
+                    type="primary"
+                    icon={<FilePdfOutlined />}
+                    onClick={() => this.exportToPdf()}
+                  >
+                    Export PDF
+                  </Button>
+                }
+              >
+                {error && <div style={{ color: 'red' }}>{error}</div>}
+              </Card>
+            </Col>
+          </Row>
 
-        <div className="dashboard-export-container">
-          <button onClick={() => this.exportToPdf()} className="dashboard-export-button">
-            Xuất PDF
-          </button>
+          {!loading && !error && (
+            <>
+              {/* Revenue Charts */}
+              <Row gutter={[16, 16]} style={{ marginBottom: '24px' }}>
+                <Col xs={24} sm={24} md={8}>
+                  <Card title="Monthly Revenue">
+                    <Line data={monthData} options={chartOptions} />
+                  </Card>
+                </Col>
+                <Col xs={24} sm={24} md={8}>
+                  <Card title="Quarterly Revenue">
+                    <Bar data={quarterData} options={chartOptions} />
+                  </Card>
+                </Col>
+                <Col xs={24} sm={24} md={8}>
+                  <Card title="Yearly Revenue">
+                    <Bar data={yearData} options={chartOptions} />
+                  </Card>
+                </Col>
+              </Row>
+
+              {/* Product Lists */}
+              <Row gutter={[16, 16]}>
+                <Col xs={24} sm={24} md={12}>
+                  <Card title="Newest Products">
+                    <Table
+                      columns={productColumns}
+                      dataSource={newestProducts.map((item) => ({
+                        ...item,
+                        key: item._id,
+                      }))}
+                      pagination={false}
+                      size="small"
+                    />
+                  </Card>
+                </Col>
+                <Col xs={24} sm={24} md={12}>
+                  <Card title="Top Selling Products">
+                    <Table
+                      columns={productColumns}
+                      dataSource={topProducts.map((item) => ({
+                        ...item,
+                        key: item._id,
+                      }))}
+                      pagination={false}
+                      size="small"
+                    />
+                  </Card>
+                </Col>
+              </Row>
+            </>
+          )}
         </div>
-
-        {loading && <p>Đang tải dữ liệu...</p>}
-        {error && <p className="dashboard-error">{error}</p>}
-
-        {!loading && !error && (
-          <>
-            <section>
-              <h3>Doanh thu</h3>
-              <div className="dashboard-charts-grid">
-                <div className="dashboard-card">
-                  <h4>Theo tháng</h4>
-                  <Line data={monthData} options={chartOptions} />
-                </div>
-                <div className="dashboard-card">
-                  <h4>Theo quý</h4>
-                  <Bar data={quarterData} options={chartOptions} />
-                </div>
-                <div className="dashboard-card">
-                  <h4>Theo năm</h4>
-                  <Bar data={yearData} options={chartOptions} />
-                </div>
-              </div>
-            </section>
-
-            <section className="dashboard-summary-grid">
-              <div className="dashboard-card">
-                <h3>Sản phẩm mới nhất</h3>
-                <ul>
-                  {newestProducts.map(product => (
-                    <li key={product._id}>{product.name} - {Number(product.price).toLocaleString()} VND</li>
-                  ))}
-                </ul>
-              </div>
-
-              <div className="dashboard-card">
-                <h3>Sản phẩm mua nhiều nhất</h3>
-                <ul>
-                  {topProducts.map(product => (
-                    <li key={product._id}>{product.name} - {Number(product.price).toLocaleString()} VND</li>
-                  ))}
-                </ul>
-              </div>
-            </section>
-          </>
-        )}
-      </div>
+      </Spin>
     );
   }
 }

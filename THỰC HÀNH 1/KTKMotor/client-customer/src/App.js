@@ -1,4 +1,4 @@
-import './App.css';
+import 'antd/dist/reset.css';
 import React, { Component } from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import Main from './components/MainComponent';

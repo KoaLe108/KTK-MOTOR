@@ -1,13 +1,12 @@
 import axios from 'axios';
 import React, { Component } from 'react';
+import { Table, Button, Modal, Space, Card, Row, Col, Pagination } from 'antd';
+import { PlusOutlined } from '@ant-design/icons';
 import MyContext from '../contexts/MyContext';
-import '../styles/general.css';
-import '../styles/datatable.css';
-import '../styles/product.css';
 import ProductDetail from './ProductDetailComponent';
 
 class Product extends Component {
-    static contextType = MyContext; // using this.context to access global state
+    static contextType = MyContext;
     constructor(props) {
         super(props);
         this.state = {
@@ -15,96 +14,172 @@ class Product extends Component {
             noPages: 0,
             curPage: 1,
             itemSelected: null,
-            showDetail: false
+            showDetail: false,
+            loading: false
         };
     }
+
     render() {
-        const prods = this.state.products.map((item) => {
-            return (
-                <tr key={item._id} className="datatable" onClick={() => this.trItemClick(item)}>
-                    <td>{item._id}</td>
-                    <td>{item.name}</td>
-                    <td>{item.price}</td>
-                    <td>{new Date(item.cdate).toLocaleString()}</td>
-                    <td>{item.category.name}</td>
-                    <td><img src={"data:image/jpg;base64," + item.image} width="100px" height="100px" alt="" /></td>
-                </tr>
-            );
-        });
-        const pagination = Array.from({ length: this.state.noPages }, (_, index) => {
-            if ((index + 1) === this.state.curPage) {
-                return (<span key={index}>| <b>{index + 1}</b> | </span>);
-            } else {
-                return (<span key={index} className="link" onClick={() => this.lnkPageClick(index + 1)}>| {index + 1} | </span>);
-            }
-        });
+        const columns = [
+            {
+                title: 'ID',
+                dataIndex: '_id',
+                key: '_id',
+                width: '15%',
+                ellipsis: true,
+            },
+            {
+                title: 'Name',
+                dataIndex: 'name',
+                key: 'name',
+                width: '20%',
+            },
+            {
+                title: 'Price',
+                dataIndex: 'price',
+                key: 'price',
+                width: '10%',
+                render: (price) => <span>${price}</span>,
+            },
+            {
+                title: 'Category',
+                dataIndex: ['category', 'name'],
+                key: 'category',
+                width: '15%',
+            },
+            {
+                title: 'Date Created',
+                dataIndex: 'cdate',
+                key: 'cdate',
+                width: '15%',
+                render: (date) => new Date(date).toLocaleDateString(),
+            },
+            {
+                title: 'Image',
+                dataIndex: 'image',
+                key: 'image',
+                width: '10%',
+                render: (image) => (
+                    <img
+                        src={"data:image/jpg;base64," + image}
+                        alt="product"
+                        style={{ width: '50px', height: '50px', objectFit: 'cover' }}
+                    />
+                ),
+            },
+            {
+                title: 'Action',
+                key: 'action',
+                width: '10%',
+                render: (_, record) => (
+                    <Button type="link" onClick={() => this.trItemClick(record)}>
+                        Edit
+                    </Button>
+                ),
+            },
+        ];
+
         return (
-            <div className="product-page">
-                <div className="product-header">
-                    <div>
-                        <h2>Quản lý sản phẩm xe máy</h2>
-                        <p className="product-subtitle">Thêm, sửa, xoá nhanh sản phẩm để điều hành cửa hàng</p>
-                    </div>
-                    <button className="product-button" onClick={() => this.handleAddNew()}>
-                        ADD NEW PRODUCT
-                    </button>
-                </div>
-                <div className="product-table-container">
-                    <table className="product-table" border="0">
-                        <tbody>
-                            <tr className="datatable">
-                                <th>ID</th>
-                                <th>Name</th>
-                                <th>Price</th>
-                                <th>Creation date</th>
-                                <th>Category</th>
-                                <th>Image</th>
-                            </tr>
-                            {prods}
-                            <tr>
-                                <td colSpan="6">{pagination}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+            <div>
+                <Card
+                    title="Quản lý sản phẩm xe máy"
+                    extra={
+                        <Button
+                            type="primary"
+                            icon={<PlusOutlined />}
+                            onClick={() => this.handleAddNew()}
+                        >
+                            ADD NEW PRODUCT
+                        </Button>
+                    }
+                >
+                    <Table
+                        columns={columns}
+                        dataSource={this.state.products.map((item) => ({
+                            ...item,
+                            key: item._id,
+                        }))}
+                        loading={this.state.loading}
+                        pagination={false}
+                        scroll={{ x: 800 }}
+                    />
+                    <Row style={{ marginTop: '16px', justifyContent: 'center' }}>
+                        <Pagination
+                            current={this.state.curPage}
+                            total={this.state.noPages * 10}
+                            pageSize={10}
+                            onChange={(page) => this.lnkPageClick(page)}
+                        />
+                    </Row>
+                </Card>
+
                 {this.state.showDetail && (
-                    <div className="modal-backdrop" onClick={() => this.closeDetail()}>
-                        <div className="modal-window product-modal" onClick={(e) => e.stopPropagation()}>
-                            <ProductDetail item={this.state.itemSelected} curPage={this.state.curPage} updateProducts={this.updateProducts} onClose={() => this.closeDetail()} />
-                        </div>
-                    </div>
+                    <Modal
+                        title="Product Detail"
+                        open={this.state.showDetail}
+                        onCancel={() => this.closeDetail()}
+                        footer={null}
+                        width={800}
+                    >
+                        <ProductDetail
+                            item={this.state.itemSelected}
+                            curPage={this.state.curPage}
+                            updateProducts={this.updateProducts}
+                            onClose={() => this.closeDetail()}
+                        />
+                    </Modal>
                 )}
             </div>
         );
     }
+
     componentDidMount() {
         this.apiGetProducts(this.state.curPage);
     }
+
     // event-handlers
     lnkPageClick(index) {
         this.apiGetProducts(index);
     }
+
     trItemClick(item) {
         this.setState({ itemSelected: item, showDetail: true });
     }
 
     handleAddNew() {
-        this.setState({ itemSelected: { _id: '', name: '', price: '', category: { _id: '' }, image: '' }, showDetail: true });
+        this.setState({
+            itemSelected: { _id: '', name: '', price: '', category: { _id: '' }, image: '' },
+            showDetail: true,
+        });
     }
 
     closeDetail() {
         this.setState({ showDetail: false, itemSelected: null });
     }
+
     // apis
     apiGetProducts(page) {
+        this.setState({ loading: true });
         const config = { headers: { 'x-access-token': this.context.token } };
-        axios.get('/api/admin/products?page=' + page, config).then((res) => {
-            const result = res.data;
-            this.setState({ products: result.products, noPages: result.noPages, curPage: result.curPage });
-        });
+        axios
+            .get('/api/admin/products?page=' + page, config)
+            .then((res) => {
+                const result = res.data;
+                this.setState({
+                    products: result.products,
+                    noPages: result.noPages,
+                    curPage: result.curPage,
+                    loading: false,
+                });
+            })
+            .catch(() => {
+                this.setState({ loading: false });
+            });
     }
-    updateProducts = (products, noPages) => { // arrow-function
+
+    updateProducts = (products, noPages) => {
         this.setState({ products: products, noPages: noPages });
-    }
+    };
 }
+
 export default Product;
