@@ -1,6 +1,9 @@
 import axios from 'axios';
 import React, { Component } from 'react';
 import MyContext from '../contexts/MyContext';
+import '../styles/general.css';
+import '../styles/datatable.css';
+import '../styles/product.css';
 import ProductDetail from './ProductDetailComponent';
 
 class Product extends Component {
@@ -11,7 +14,8 @@ class Product extends Component {
             products: [],
             noPages: 0,
             curPage: 1,
-            itemSelected: null
+            itemSelected: null,
+            showDetail: false
         };
     }
     render() {
@@ -35,10 +39,18 @@ class Product extends Component {
             }
         });
         return (
-            <div>
-                <div className="float-left">
-                    <h2 className="text-center">PRODUCT LIST</h2>
-                    <table className="datatable" border="1">
+            <div className="product-page">
+                <div className="product-header">
+                    <div>
+                        <h2>Quản lý sản phẩm xe máy</h2>
+                        <p className="product-subtitle">Thêm, sửa, xoá nhanh sản phẩm để điều hành cửa hàng</p>
+                    </div>
+                    <button className="product-button" onClick={() => this.handleAddNew()}>
+                        ADD NEW PRODUCT
+                    </button>
+                </div>
+                <div className="product-table-container">
+                    <table className="product-table" border="0">
                         <tbody>
                             <tr className="datatable">
                                 <th>ID</th>
@@ -55,9 +67,13 @@ class Product extends Component {
                         </tbody>
                     </table>
                 </div>
-                <div className="inline" />
-                <ProductDetail item={this.state.itemSelected} curPage={this.state.curPage} updateProducts={this.updateProducts} />
-                <div className="float-clear" />
+                {this.state.showDetail && (
+                    <div className="modal-backdrop" onClick={() => this.closeDetail()}>
+                        <div className="modal-window product-modal" onClick={(e) => e.stopPropagation()}>
+                            <ProductDetail item={this.state.itemSelected} curPage={this.state.curPage} updateProducts={this.updateProducts} onClose={() => this.closeDetail()} />
+                        </div>
+                    </div>
+                )}
             </div>
         );
     }
@@ -69,7 +85,15 @@ class Product extends Component {
         this.apiGetProducts(index);
     }
     trItemClick(item) {
-        this.setState({ itemSelected: item });
+        this.setState({ itemSelected: item, showDetail: true });
+    }
+
+    handleAddNew() {
+        this.setState({ itemSelected: { _id: '', name: '', price: '', category: { _id: '' }, image: '' }, showDetail: true });
+    }
+
+    closeDetail() {
+        this.setState({ showDetail: false, itemSelected: null });
     }
     // apis
     apiGetProducts(page) {

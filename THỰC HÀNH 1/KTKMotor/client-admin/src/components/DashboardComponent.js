@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import axios from 'axios';
 import MyContext from '../contexts/MyContext';
 import { Bar, Line } from 'react-chartjs-2';
+import '../styles/general.css';
+import '../styles/dashboard.css';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -145,37 +147,37 @@ class Dashboard extends Component {
       <div ref={this.dashboardRef}>
         <h2 className="text-center">ADMIN DASHBOARD</h2>
 
-        <div style={{ marginBottom: '16px' }}>
-          <button onClick={() => this.exportToPdf()} style={{ cursor: 'pointer', padding: '8px 16px', borderRadius: '4px', border: 'none', backgroundColor: '#1976d2', color: '#fff' }}>
+        <div className="dashboard-export-container">
+          <button onClick={() => this.exportToPdf()} className="dashboard-export-button">
             Xuất PDF
           </button>
         </div>
 
         {loading && <p>Đang tải dữ liệu...</p>}
-        {error && <p style={{ color: 'red' }}>{error}</p>}
+        {error && <p className="dashboard-error">{error}</p>}
 
         {!loading && !error && (
           <>
             <section>
               <h3>Doanh thu</h3>
-              <div style={{ display: 'grid', gap: '24px' }}>
-                <div style={{ padding: '16px', border: '1px solid #ccc', borderRadius: '8px' }}>
+              <div className="dashboard-charts-grid">
+                <div className="dashboard-card">
                   <h4>Theo tháng</h4>
                   <Line data={monthData} options={chartOptions} />
                 </div>
-                <div style={{ padding: '16px', border: '1px solid #ccc', borderRadius: '8px' }}>
+                <div className="dashboard-card">
                   <h4>Theo quý</h4>
                   <Bar data={quarterData} options={chartOptions} />
                 </div>
-                <div style={{ padding: '16px', border: '1px solid #ccc', borderRadius: '8px' }}>
+                <div className="dashboard-card">
                   <h4>Theo năm</h4>
                   <Bar data={yearData} options={chartOptions} />
                 </div>
               </div>
             </section>
 
-            <section style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginTop: '24px' }}>
-              <div style={{ padding: '16px', border: '1px solid #ccc', borderRadius: '8px' }}>
+            <section className="dashboard-summary-grid">
+              <div className="dashboard-card">
                 <h3>Sản phẩm mới nhất</h3>
                 <ul>
                   {newestProducts.map(product => (
@@ -184,7 +186,7 @@ class Dashboard extends Component {
                 </ul>
               </div>
 
-              <div style={{ padding: '16px', border: '1px solid #ccc', borderRadius: '8px' }}>
+              <div className="dashboard-card">
                 <h3>Sản phẩm mua nhiều nhất</h3>
                 <ul>
                   {topProducts.map(product => (

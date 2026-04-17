@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import MyContext from '../contexts/MyContext';
+import '../styles/general.css';
 import Menu from './MenuComponent';
 import Home from './HomeComponent';
 import Category from './CategoryComponent';

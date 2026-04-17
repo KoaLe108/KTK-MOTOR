@@ -1,6 +1,7 @@
 import axios from 'axios';
 import React, { Component } from 'react';
 import MyContext from '../contexts/MyContext';
+import '../styles/general.css';
 
 class CategoryDetail extends Component {
   static contextType = MyContext; // using this.context to access global state
@@ -13,8 +14,15 @@ class CategoryDetail extends Component {
   }
   render() {
     return (
-      <div className="float-right">
-        <h2 className="text-center">CATEGORY DETAIL</h2>
+      <div className="category-detail-form">
+        <div style={{ position: 'relative' }}>
+          <h2 className="text-center">CATEGORY DETAIL</h2>
+          {this.props.onClose && (
+            <button type="button" className="modal-close" onClick={this.props.onClose}>
+              ×
+            </button>
+          )}
+        </div>
         <form>
           <table>
             <tbody>
@@ -36,7 +44,7 @@ class CategoryDetail extends Component {
                   <input type="submit" value="ADD NEW" onClick={(e) => this.btnAddClick(e)} />
                   <input type="submit" value="UPDATE" onClick={(e) => this.btnUpdateClick(e)} />
                   {/* THAY ĐỔI: Thêm sự kiện onClick cho nút DELETE */}
-                  <input type="submit" value="DELETE" onClick={(e) => this.btnDeleteClick(e)} />
+                  <input type="submit" className="delete-button" value="DELETE" onClick={(e) => this.btnDeleteClick(e)} />
                 </td>
               </tr>
             </tbody>
@@ -45,9 +53,22 @@ class CategoryDetail extends Component {
       </div>
     );
   }
+
+  componentDidMount() {
+    if (this.props.item) {
+      this.setState({
+        txtID: this.props.item._id || '',
+        txtName: this.props.item.name || ''
+      });
+    }
+  }
+
   componentDidUpdate(prevProps) {
     if (this.props.item !== prevProps.item) {
-      this.setState({ txtID: this.props.item._id, txtName: this.props.item.name });
+      this.setState({
+        txtID: this.props.item ? this.props.item._id || '' : '',
+        txtName: this.props.item ? this.props.item.name || '' : ''
+      });
     }
   }
 

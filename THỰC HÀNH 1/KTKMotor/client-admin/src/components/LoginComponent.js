@@ -1,6 +1,64 @@
 import axios from 'axios';
 import React, { Component } from 'react';
 import MyContext from '../contexts/MyContext';
+import '../styles/general.css';
+
+const styles = {
+  loginPage: {
+    minHeight: '100vh',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    background: 'radial-gradient(circle at top left, rgba(229, 115, 115, 0.2), transparent 25%), linear-gradient(180deg, #fff0f0 0%, #fde3e3 100%)',
+    padding: '24px'
+  },
+  loginCard: {
+    width: '100%',
+    maxWidth: '420px',
+    padding: '32px',
+    borderRadius: '24px',
+    background: 'rgba(255, 255, 255, 0.96)',
+    boxShadow: '0 24px 60px rgba(183, 28, 28, 0.15)',
+    border: '1px solid rgba(183, 28, 28, 0.18)'
+  },
+  title: {
+    marginBottom: '24px',
+    color: '#b71c1c',
+    textAlign: 'center'
+  },
+  loginField: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '8px',
+    marginBottom: '16px'
+  },
+  label: {
+    fontWeight: 700,
+    color: '#7f1717'
+  },
+  input: {
+    padding: '12px 14px',
+    borderRadius: '12px',
+    border: '1px solid #f2c2c2',
+    background: '#fff7f7'
+  },
+  loginActions: {
+    textAlign: 'center'
+  },
+  loginButton: {
+    width: '100%',
+    padding: '12px 18px',
+    border: 'none',
+    borderRadius: '999px',
+    background: 'linear-gradient(90deg, #c62828 0%, #d32f2f 100%)',
+    color: '#fff',
+    fontWeight: 700,
+    cursor: 'pointer'
+  },
+  loginButtonHover: {
+    opacity: 0.95
+  }
+};
 
 class Login extends Component {
   static contextType = MyContext; // using this.context to access global state
@@ -8,32 +66,51 @@ class Login extends Component {
     super(props);
     this.state = {
       txtUsername: '',
-      txtPassword: ''
+      txtPassword: '',
+      isHovering: false
     };
   }
   render() {
     if (this.context.token === '') {
+      const buttonStyle = this.state.isHovering
+        ? { ...styles.loginButton, ...styles.loginButtonHover }
+        : styles.loginButton;
+
       return (
-        <div className="align-valign-center">
-          <h2 className="text-center">ADMIN LOGIN</h2>
-          <form>
-            <table className="align-center">
-              <tbody>
-                <tr>
-                  <td>Username</td>
-                  <td><input type="text" value={this.state.txtUsername} onChange={(e) => { this.setState({ txtUsername: e.target.value }) }} /></td>
-                </tr>
-                <tr>
-                  <td>Password</td>
-                  <td><input type="password" value={this.state.txtPassword} onChange={(e) => { this.setState({ txtPassword: e.target.value }) }} /></td>
-                </tr>
-                <tr>
-                  <td></td>
-                  <td><input type="submit" value="LOGIN" onClick={(e) => this.btnLoginClick(e)} /></td>
-                </tr>
-              </tbody>
-            </table>
-          </form>
+        <div style={styles.loginPage}>
+          <div style={styles.loginCard}>
+            <h2 style={styles.title}>KTK MOTOR ADMIN LOGIN</h2>
+            <form onSubmit={(e) => this.btnLoginClick(e)}>
+              <div style={styles.loginField}>
+                <label style={styles.label}>Username</label>
+                <input
+                  style={styles.input}
+                  type="text"
+                  value={this.state.txtUsername}
+                  onChange={(e) => this.setState({ txtUsername: e.target.value })}
+                />
+              </div>
+              <div style={styles.loginField}>
+                <label style={styles.label}>Password</label>
+                <input
+                  style={styles.input}
+                  type="password"
+                  value={this.state.txtPassword}
+                  onChange={(e) => this.setState({ txtPassword: e.target.value })}
+                />
+              </div>
+              <div style={styles.loginActions}>
+                <button
+                  type="submit"
+                  style={buttonStyle}
+                  onMouseEnter={() => this.setState({ isHovering: true })}
+                  onMouseLeave={() => this.setState({ isHovering: false })}
+                >
+                  LOGIN
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       );
     }

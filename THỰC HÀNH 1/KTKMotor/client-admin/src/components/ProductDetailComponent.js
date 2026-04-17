@@ -1,6 +1,7 @@
 import axios from 'axios';
 import React, { Component } from 'react';
 import MyContext from '../contexts/MyContext';
+import '../styles/general.css';
 
 class ProductDetail extends Component {
     static contextType = MyContext; // using this.context to access global state
@@ -17,15 +18,18 @@ class ProductDetail extends Component {
     }
     render() {
         const cates = this.state.categories.map((cate) => {
-            if (this.props.item != null) {
-                return (<option key={cate._id} value={cate._id} selected={cate._id === this.props.item.category._id}>{cate.name}</option>);
-            } else {
-                return (<option key={cate._id} value={cate._id}>{cate.name}</option>);
-            }
+            return (<option key={cate._id} value={cate._id}>{cate.name}</option>);
         });
         return (
-            <div className="float-right">
-                <h2 className="text-center">PRODUCT DETAIL</h2>
+            <div className="product-detail-form">
+                <div style={{ position: 'relative' }}>
+                    <h2 className="text-center">PRODUCT DETAIL</h2>
+                    {this.props.onClose && (
+                        <button type="button" className="modal-close" onClick={this.props.onClose}>
+                            ×
+                        </button>
+                    )}
+                </div>
                 <form>
                     <table>
                         <tbody>
@@ -47,14 +51,14 @@ class ProductDetail extends Component {
                             </tr>
                             <tr>
                                 <td>Category</td>
-                                <td><select onChange={(e) => { this.setState({ cmbCategory: e.target.value }) }}>{cates}</select></td>
+                                <td><select value={this.state.cmbCategory} onChange={(e) => { this.setState({ cmbCategory: e.target.value }) }}>{cates}</select></td>
                             </tr>
                             <tr>
                                 <td></td>
                                 <td>
                                     <input type="submit" value="ADD NEW" onClick={(e) => this.btnAddClick(e)} />
                                     <input type="submit" value="UPDATE" onClick={(e) => this.btnUpdateClick(e)} />
-                                    <input type="submit" value="DELETE" onClick={(e) => this.btnDeleteClick(e)} />
+                                    <input type="submit" className="delete-button" value="DELETE" onClick={(e) => this.btnDeleteClick(e)} />
                                 </td>
                             </tr>
                             <tr>
@@ -68,15 +72,24 @@ class ProductDetail extends Component {
     }
     componentDidMount() {
         this.apiGetCategories();
+        if (this.props.item) {
+            this.setState({
+                txtID: this.props.item._id || '',
+                txtName: this.props.item.name || '',
+                txtPrice: this.props.item.price || 0,
+                cmbCategory: this.props.item.category ? this.props.item.category._id : '',
+                imgProduct: this.props.item.image ? 'data:image/jpg;base64,' + this.props.item.image : ''
+            });
+        }
     }
     componentDidUpdate(prevProps) {
         if (this.props.item !== prevProps.item) {
             this.setState({
-                txtID: this.props.item._id,
-                txtName: this.props.item.name,
-                txtPrice: this.props.item.price,
-                cmbCategory: this.props.item.category._id,
-                imgProduct: 'data:image/jpg;base64,' + this.props.item.image
+                txtID: this.props.item ? this.props.item._id || '' : '',
+                txtName: this.props.item ? this.props.item.name || '' : '',
+                txtPrice: this.props.item ? this.props.item.price || 0 : 0,
+                cmbCategory: this.props.item && this.props.item.category ? this.props.item.category._id : '',
+                imgProduct: this.props.item && this.props.item.image ? 'data:image/jpg;base64,' + this.props.item.image : ''
             });
         }
     }

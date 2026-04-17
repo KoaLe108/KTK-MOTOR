@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 import MyContext from '../contexts/MyContext';
+import '../styles/general.css';
+import '../styles/menu.css';
 import { Link } from 'react-router-dom';
 
 class Menu extends Component {

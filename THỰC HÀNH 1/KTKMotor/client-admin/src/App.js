@@ -1,4 +1,3 @@
-import './App.css';
 import React, { Component } from 'react';
 import MyProvider from './contexts/MyProvider';
 import Login from './components/LoginComponent';
