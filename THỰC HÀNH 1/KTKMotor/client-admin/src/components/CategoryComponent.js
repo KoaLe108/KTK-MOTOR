@@ -1,6 +1,9 @@
 import axios from 'axios';
 import React, { Component } from 'react';
 import MyContext from '../contexts/MyContext';
+import '../styles/general.css';
+import '../styles/datatable.css';
+import '../styles/category.css';
 import CategoryDetail from './CategoryDetailComponent';
 
 class Category extends Component {
@@ -9,7 +12,8 @@ class Category extends Component {
     super(props);
     this.state = {
       categories: [],
-      itemSelected: null
+      itemSelected: null,
+      showDetail: false
     };
   }
   render() {
@@ -22,10 +26,18 @@ class Category extends Component {
       );
     });
     return (
-      <div>
-        <div className="float-left">
-          <h2 className="text-center">CATEGORY LIST</h2>
-          <table className="datatable" border="1">
+      <div className="category-page">
+        <div className="category-header">
+          <div>
+            <h2>Cửa hàng xe máy KTK</h2>
+            <p className="category-subtitle">Quản lý danh mục xe máy, cập nhật nhanh sản phẩm và bộ lọc theo loại</p>
+          </div>
+          <button className="category-button" onClick={() => this.handleAddNew()}>
+            ADD NEW CATEGORY
+          </button>
+        </div>
+        <div className="category-table-container">
+          <table className="category-table" border="0">
             <tbody>
               <tr className="datatable">
                 <th>ID</th>
@@ -35,10 +47,13 @@ class Category extends Component {
             </tbody>
           </table>
         </div>
-        <div className="inline" />
-        {/* THAY ĐỔI: Truyền thêm props updateCategories */}
-        <CategoryDetail item={this.state.itemSelected} updateCategories={this.updateCategories} />
-        <div className="float-clear" />
+        {this.state.showDetail && (
+          <div className="modal-backdrop" onClick={() => this.closeDetail()}>
+            <div className="modal-window category-modal" onClick={(e) => e.stopPropagation()}>
+              <CategoryDetail item={this.state.itemSelected} updateCategories={this.updateCategories} onClose={() => this.closeDetail()} />
+            </div>
+          </div>
+        )}
       </div>
     );
   }
@@ -52,8 +67,16 @@ class Category extends Component {
     this.apiGetCategories();
   }
   // event-handlers
+  handleAddNew() {
+    this.setState({ itemSelected: { _id: '', name: '' }, showDetail: true });
+  }
+
   trItemClick(item) {
-    this.setState({ itemSelected: item });
+    this.setState({ itemSelected: item, showDetail: true });
+  }
+
+  closeDetail() {
+    this.setState({ showDetail: false, itemSelected: null });
   }
   // apis
   apiGetCategories() {

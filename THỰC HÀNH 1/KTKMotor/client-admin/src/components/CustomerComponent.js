@@ -1,6 +1,9 @@
 import axios from 'axios'; // [cite: 57]
 import React, { Component } from 'react'; // [cite: 58]
 import MyContext from '../contexts/MyContext'; // [cite: 59]
+import '../styles/general.css';
+import '../styles/datatable.css';
+import '../styles/customer.css';
 
 class Customer extends Component {
   static contextType = MyContext; // Truy cập global state [cite: 62]
@@ -70,12 +73,18 @@ class Customer extends Component {
     }
 
     return (
-      <div>
-        <div className="align-center">
-          <h2 className="text-center">CUSTOMER LIST</h2>
-          <table className="datatable" border="1">
+      <div className="customer-page">
+        <div className="customer-header">
+          <div>
+            <h2>CUSTOMER MANAGEMENT</h2>
+            <p className="customer-subtitle">Quản lý khách hàng và theo dõi đơn hàng trong hệ thống bán xe máy.</p>
+          </div>
+        </div>
+
+        <div className="customer-table-container">
+          <table className="customer-table" border="1">
             <tbody>
-              <tr className="datatable">
+              <tr>
                 <th>ID</th><th>Username</th><th>Password</th><th>Name</th>
                 <th>Phone</th><th>Email</th><th>Active</th><th>Action</th>
               </tr>
@@ -83,12 +92,13 @@ class Customer extends Component {
             </tbody>
           </table>
         </div>
+
         {this.state.orders.length > 0 ? (
-          <div className="align-center">
-<h2 className="text-center">ORDER LIST</h2>
-            <table className="datatable" border="1">
+          <div className="customer-table-container">
+            <h2>ORDER LIST</h2>
+            <table className="customer-table" border="1">
               <tbody>
-                <tr className="datatable">
+                <tr>
                   <th>ID</th><th>Creation date</th><th>Cust.name</th>
                   <th>Cust.phone</th><th>Total</th><th>Status</th>
                 </tr>
@@ -97,12 +107,13 @@ class Customer extends Component {
             </table>
           </div>
         ) : <div />}
+
         {this.state.order ? (
-          <div className="align-center">
-            <h2 className="text-center">ORDER DETAIL</h2>
-            <table className="datatable" border="1">
+          <div className="customer-table-container customer-detail-card">
+            <h2>ORDER DETAIL</h2>
+            <table className="customer-table" border="1">
               <tbody>
-                <tr className="datatable">
+                <tr>
                   <th>No.</th><th>Prod. ID</th><th>Prod.name</th><th>Image</th>
                   <th>Price</th><th>Quantity</th><th>Amount</th>
                 </tr>
