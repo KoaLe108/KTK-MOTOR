@@ -61,7 +61,7 @@ class ProductDetail extends Component {
                             style={{ width: '100%' }}
                             min={0}
                             placeholder="Enter price"
-                            prefix="$"
+                            suffix="vnđ"
                         />
                     </Form.Item>
 

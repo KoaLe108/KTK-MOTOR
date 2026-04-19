@@ -1,19 +1,20 @@
 import axios from 'axios';
 import React, { Component } from 'react';
-import { Layout, Menu, Input, Button, AutoComplete } from 'antd';
-import { HomeOutlined, SearchOutlined } from '@ant-design/icons';
-import { useNavigate } from 'react-router-dom';
+import { Layout, Menu, Input, Button, Dropdown } from 'antd';
+import { HomeOutlined, SearchOutlined, LogoutOutlined, UserOutlined } from '@ant-design/icons';
 import withRouter from '../utils/withRouter';
+import MyContext from '../contexts/MyContext';
 
 class MenuComponent extends Component {
     constructor(props) {
         super(props);
         this.state = {
             categories: [],
-            txtKeyword: '',
-            categoriesOptions: []
+            txtKeyword: ''
         };
     }
+
+    static contextType = MyContext;
 
     render() {
         const menuItems = [
@@ -28,6 +29,36 @@ class MenuComponent extends Component {
                 label: cat.name,
                 onClick: () => this.props.navigate('/product/category/' + cat._id),
             })),
+        ];
+
+        // Menu items cho user đã login
+        const userMenuItems = [
+            {
+                key: 'profile',
+                icon: <UserOutlined />,
+                label: 'My Profile',
+                onClick: () => this.props.navigate('/myprofile'),
+            },
+            {
+                key: 'myorders',
+                label: 'My Orders',
+                onClick: () => this.props.navigate('/myorders'),
+            },
+            {
+                key: 'mycart',
+                label: 'My Cart',
+                onClick: () => this.props.navigate('/mycart'),
+            },
+            {
+                type: 'divider',
+            },
+            {
+                key: 'logout',
+                danger: true,
+                icon: <LogoutOutlined />,
+                label: 'Logout',
+                onClick: () => this.btnLogoutClick(),
+            },
         ];
 
         return (
@@ -52,7 +83,7 @@ class MenuComponent extends Component {
                     theme="dark"
                 />
                 <form
-                    style={{ display: 'flex', gap: '8px' }}
+                    style={{ display: 'flex', gap: '8px', marginRight: '20px' }}
                     onSubmit={(e) => this.btnSearchClick(e)}
                 >
                     <Input
@@ -69,6 +100,34 @@ class MenuComponent extends Component {
                         SEARCH
                     </Button>
                 </form>
+
+                {/* Auth Section */}
+                {this.context.token ? (
+                    <Dropdown
+                        menu={{ items: userMenuItems }}
+                        placement="bottomRight"
+                        trigger={['click']}
+                    >
+                        <Button type="primary" icon={<UserOutlined />}>
+                            {this.context.customer?.name || 'User'}
+                        </Button>
+                    </Dropdown>
+                ) : (
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                        <Button 
+                            onClick={() => this.props.navigate('/login')}
+                            type="default"
+                        >
+                            Login
+                        </Button>
+                        <Button 
+                            onClick={() => this.props.navigate('/signup')}
+                            type="primary"
+                        >
+                            Sign Up
+                        </Button>
+                    </div>
+                )}
             </Layout.Header>
         );
     }
@@ -83,6 +142,13 @@ class MenuComponent extends Component {
         if (this.state.txtKeyword.trim()) {
             this.props.navigate('/product/search/' + this.state.txtKeyword);
         }
+    }
+
+    btnLogoutClick() {
+        this.context.setToken('');
+        this.context.setCustomer(null);
+        this.context.setMycart([]);
+        this.props.navigate('/');
     }
 
     // apis

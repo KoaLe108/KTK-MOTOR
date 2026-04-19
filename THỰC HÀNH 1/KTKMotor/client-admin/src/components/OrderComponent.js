@@ -49,7 +49,7 @@ class Order extends Component {
         dataIndex: 'total',
         key: 'total',
         width: '10%',
-        render: (total) => <span>${total}</span>,
+        render: (total) => <span>{Number(total).toLocaleString('vi-VN')} vnđ</span>,
       },
       {
         title: 'Status',
@@ -127,7 +127,7 @@ class Order extends Component {
         dataIndex: ['product', 'price'],
         key: 'price',
         width: '12%',
-        render: (price) => <span>${price}</span>,
+        render: (price) => <span>{price.toLocaleString('vi-VN')} vnđ</span>,
       },
       {
         title: 'Quantity',
@@ -140,7 +140,7 @@ class Order extends Component {
         key: 'amount',
         width: '12%',
         render: (_, record) => (
-          <span>${(record.product.price * record.quantity).toFixed(2)}</span>
+          <span>{(record.product.price * record.quantity).toLocaleString('vi-VN')} vnđ</span>
         ),
       },
     ];
@@ -172,7 +172,7 @@ class Order extends Component {
               scroll={{ x: 800 }}
             />
             <div style={{ marginTop: '16px', textAlign: 'right' }}>
-              <strong>Total: ${this.state.order.total}</strong>
+              <strong>Total: {Number(this.state.order.total).toLocaleString('vi-VN')} vnđ</strong>
             </div>
           </Card>
         )}

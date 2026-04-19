@@ -1,75 +1,174 @@
 import axios from 'axios';
 import React, { Component } from 'react';
+import { Row, Col, Card, Image, InputNumber, Button, Spin, message, Statistic, Divider } from 'antd';
+import { ShoppingCartOutlined, ArrowLeftOutlined } from '@ant-design/icons';
 import withRouter from '../utils/withRouter';
-import MyContext from '../contexts/MyContext'; // 1. Import MyContext
+import MyContext from '../contexts/MyContext';
 
 class ProductDetail extends Component {
-    static contextType = MyContext; // 2. Thiết lập contextType để dùng this.context
+    static contextType = MyContext;
 
     constructor(props) {
         super(props);
         this.state = {
             product: null,
-            txtQuantity: 1 // 3. Khởi tạo giá trị mặc định cho ô nhập số lượng
+            quantity: 1,
+            loading: true
         };
     }
 
     render() {
         const prod = this.state.product;
-        if (prod != null) {
+
+        if (!prod) {
             return (
-                <div className="align-center">
-                    <h2 className="text-center">PRODUCT DETAILS</h2>
-                    <figure className="caption-right">
-                        <img src={"data:image/jpg;base64," + prod.image} width="400px" height="400px" alt="" />
-                        <figcaption>
-                            <form>
-                                <table>
-                                    <tbody>
-                                        <tr>
-                                            <td align="right">ID:</td>
-                                            <td>{prod._id}</td>
-                                        </tr>
-                                        <tr>
-                                            <td align="right">Name:</td>
-                                            <td>{prod.name}</td>
-                                        </tr>
-                                        <tr>
-                                            <td align="right">Price:</td>
-                                            <td>{prod.price}</td>
-                                        </tr>
-                                        <tr>
-                                            <td align="right">Category:</td>
-                                            <td>{prod.category.name}</td>
-                                        </tr>
-                                        <tr>
-                                            <td align="right">Quantity:</td>
-                                            <td>
-                                                <input 
-                                                    type="number" min="1" max="99" 
-                                                    value={this.state.txtQuantity} 
-                                                    onChange={(e) => { this.setState({ txtQuantity: e.target.value }) }} 
-                                                />
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td></td>
-                                            <td>
-                                                <input 
-                                                    type="submit" value="ADD TO CART"
-                                                    onClick={(e) => this.btnAdd2CartClick(e)} 
-                                                />
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </form>
-                        </figcaption>
-                    </figure>
-                </div>
+                <Spin spinning={this.state.loading} style={{ minHeight: '400px' }}>
+                    <div />
+                </Spin>
             );
         }
-        return (<div />);
+
+        return (
+            <div style={{ padding: '20px' }}>
+                <Button
+                    icon={<ArrowLeftOutlined />}
+                    onClick={() => this.props.navigate(-1)}
+                    style={{ marginBottom: '20px' }}
+                >
+                    Back
+                </Button>
+
+                <Card style={{ borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
+                    <Row gutter={32}>
+                        {/* Image Section */}
+                        <Col xs={24} sm={24} md={12} lg={10}>
+                            <Image
+                                src={"data:image/jpg;base64," + prod.image}
+                                alt={prod.name}
+                                preview
+                                style={{
+                                    borderRadius: '8px',
+                                    width: '100%',
+                                    height: 'auto'
+                                }}
+                            />
+                        </Col>
+
+                        {/* Details Section */}
+                        <Col xs={24} sm={24} md={12} lg={14}>
+                            <h1 style={{
+                                fontSize: '28px',
+                                fontWeight: 'bold',
+                                marginBottom: '16px',
+                                color: '#333'
+                            }}>
+                                {prod.name}
+                            </h1>
+
+                            <Divider />
+
+                            {/* Category */}
+                            <div style={{ marginBottom: '16px' }}>
+                                <span style={{ fontSize: '14px', color: '#666' }}>Category: </span>
+                                <span style={{
+                                    fontSize: '14px',
+                                    fontWeight: 'bold',
+                                    color: '#1890ff'
+                                }}>
+                                    {prod.category.name}
+                                </span>
+                            </div>
+
+                            {/* Price */}
+                            <div style={{ marginBottom: '24px' }}>
+                                <Statistic
+                                    title="Price"
+                                    value={prod.price}
+                                    suffix=" vnđ"
+                                    valueStyle={{
+                                        fontSize: '32px',
+                                        color: '#ff4d4f',
+                                        fontWeight: 'bold'
+                                    }}
+                                    formatter={(value) => value.toLocaleString('vi-VN')}
+                                />
+                            </div>
+
+                            <Divider />
+
+                            {/* Quantity Selection */}
+                            <div style={{ marginBottom: '24px' }}>
+                                <label style={{
+                                    fontSize: '14px',
+                                    fontWeight: 'bold',
+                                    marginBottom: '8px',
+                                    display: 'block'
+                                }}>
+                                    Quantity:
+                                </label>
+                                <InputNumber
+                                    min={1}
+                                    max={99}
+                                    value={this.state.quantity}
+                                    onChange={(value) => this.setState({ quantity: value || 1 })}
+                                    style={{
+                                        width: '100px',
+                                        marginBottom: '16px'
+                                    }}
+                                    size="large"
+                                />
+                            </div>
+
+                            {/* Action Buttons */}
+                            <Row gutter={16}>
+                                <Col xs={24} sm={12} md={12}>
+                                    <Button
+                                        type="primary"
+                                        size="large"
+                                        icon={<ShoppingCartOutlined />}
+                                        block
+                                        onClick={() => this.btnAdd2CartClick()}
+                                        style={{
+                                            height: '50px',
+                                            fontSize: '16px',
+                                            fontWeight: 'bold'
+                                        }}
+                                    >
+                                        ADD TO CART
+                                    </Button>
+                                </Col>
+                                <Col xs={24} sm={12} md={12}>
+                                    <Button
+                                        size="large"
+                                        block
+                                        onClick={() => this.props.navigate('/mycart')}
+                                        style={{
+                                            height: '50px',
+                                            fontSize: '16px'
+                                        }}
+                                    >
+                                        VIEW CART
+                                    </Button>
+                                </Col>
+                            </Row>
+
+                            {/* Product Info */}
+                            <Divider />
+                            <div style={{
+                                backgroundColor: '#f5f5f5',
+                                padding: '12px',
+                                borderRadius: '4px',
+                                marginTop: '16px'
+                            }}>
+                                <p style={{ margin: 0, fontSize: '12px', color: '#666' }}>
+                                    <strong>Product ID:</strong> {prod._id.substring(0, 12)}...
+                                </p>
+                            </div>
+                        </Col>
+                    </Row>
+                </Card>
+            </div>
+        );
     }
 
     componentDidMount() {
@@ -77,51 +176,45 @@ class ProductDetail extends Component {
         this.apiGetProduct(params.id);
     }
 
-    // apis
-    apiGetProduct(id) {
-        axios.get('/api/customer/products/' + id).then((res) => {
-            const result = res.data;
-            this.setState({ product: result });
-        });
-    }
-
     // event-handlers
-    // event-handlers
-    btnAdd2CartClick(e) {
-        e.preventDefault();
-        const { product, txtQuantity } = this.state;
-        const quantity = parseInt(txtQuantity);
+    btnAdd2CartClick() {
+        const { product, quantity } = this.state;
 
         if (quantity > 0) {
-            // 1. Tạo bản sao mới của mảng giỏ hàng
             const mycart = [...this.context.mycart];
-            
-            // 2. Tìm vị trí sản phẩm
             const index = mycart.findIndex(x => x.product._id === product._id);
 
             if (index === -1) {
-                // Thêm mới nếu chưa có
                 mycart.push({ product: product, quantity: quantity });
             } else {
-                // 3. QUAN TRỌNG: Tạo một object mới cho item này thay vì sửa trực tiếp
-                // Điều này giúp React chắc chắn nhận ra sự thay đổi để cập nhật giao diện
-                const updatedItem = { 
-                    ...mycart[index], 
-                    quantity: mycart[index].quantity + quantity 
+                mycart[index] = {
+                    ...mycart[index],
+                    quantity: mycart[index].quantity + quantity
                 };
-                mycart[index] = updatedItem;
             }
 
-            // 4. Cập nhật vào context
             this.context.setMycart(mycart);
-            
-            // 5. Reset lại ô nhập số lượng về 1 (tùy chọn nhưng nên làm)
-            this.setState({ txtQuantity: 1 });
-            
-            alert('OK BABY!');
+            this.setState({ quantity: 1 });
+            message.success(`${product.name} added to cart!`);
         } else {
-            alert('Please input quantity');
+            message.error('Please select a valid quantity');
         }
+    }
+
+    // apis
+    apiGetProduct(id) {
+        axios
+            .get('/api/customer/products/' + id)
+            .then((res) => {
+                this.setState({
+                    product: res.data,
+                    loading: false
+                });
+            })
+            .catch(() => {
+                this.setState({ loading: false });
+                message.error('Product not found');
+            });
     }
 }
 

@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import { Layout } from 'antd';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import Menu from './MenuComponent';
-import Inform from './InformComponent';
 import Home from './HomeComponent';
 import Product from './ProductComponent';
 import ProductDetail from './ProductDetailComponent';
@@ -18,7 +17,6 @@ class Main extends Component {
         return (
             <Layout style={{ minHeight: '100vh' }}>
                 <Menu />
-                <Inform />
                 <Layout.Content
                     style={{
                         padding: '24px',

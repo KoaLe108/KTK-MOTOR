@@ -147,7 +147,7 @@ class Dashboard extends Component {
         y: {
           beginAtZero: true,
           ticks: {
-            callback: value => '$' + value.toLocaleString()
+            callback: value => value.toLocaleString('vi-VN') + ' vnđ'
           }
         }
       }
@@ -163,7 +163,7 @@ class Dashboard extends Component {
         title: 'Price',
         dataIndex: 'price',
         key: 'price',
-        render: (price) => <span>${Number(price).toLocaleString()}</span>,
+        render: (price) => <span>{Number(price).toLocaleString('vi-VN')} vnđ</span>,
       },
     ];
 

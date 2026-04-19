@@ -39,7 +39,7 @@ class Product extends Component {
                 dataIndex: 'price',
                 key: 'price',
                 width: '10%',
-                render: (price) => <span>${price}</span>,
+                render: (price) => <span>{price.toLocaleString('vi-VN')} vnđ</span>,
             },
             {
                 title: 'Category',
