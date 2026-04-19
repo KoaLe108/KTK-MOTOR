@@ -1,7 +1,7 @@
 import axios from 'axios';
 import React, { Component } from 'react';
 import { Layout, Menu, Input, Button, Dropdown } from 'antd';
-import { HomeOutlined, SearchOutlined, LogoutOutlined, UserOutlined } from '@ant-design/icons';
+import { HomeOutlined, SearchOutlined, LogoutOutlined, UserOutlined, FileProtectOutlined } from '@ant-design/icons';
 import withRouter from '../utils/withRouter';
 import MyContext from '../contexts/MyContext';
 
@@ -33,6 +33,12 @@ class MenuComponent extends Component {
 
         // Menu items cho user đã login
         const userMenuItems = [
+            ...(this.context.customer?.active === 0 ? [{
+                key: 'active',
+                icon: <FileProtectOutlined />,
+                label: 'Activate Account',
+                onClick: () => this.props.navigate('/active'),
+            }] : []),
             {
                 key: 'profile',
                 icon: <UserOutlined />,
