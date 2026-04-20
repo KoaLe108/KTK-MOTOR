@@ -157,7 +157,7 @@ class Home extends Component {
 
         return (
             <Spin spinning={this.state.loading}>
-                <div style={{ padding: '20px' }}>
+                <div style={{ padding: '12px' }}>
                     {!isLoggedIn && (
                         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
                             <Button
@@ -172,13 +172,13 @@ class Home extends Component {
                     {/* NEW PRODUCTS SECTION */}
                     <div style={{ marginBottom: '40px' }}>
                         <h2 style={{
-                            fontSize: '28px',
+                            fontSize: '24px',
                             fontWeight: 'bold',
-                            marginBottom: '20px',
+                            marginBottom: '16px',
                             color: '#1890ff',
                             textAlign: 'center',
                             borderBottom: '2px solid #1890ff',
-                            paddingBottom: '10px'
+                            paddingBottom: '8px'
                         }}>
                             🆕 NEW PRODUCTS
                         </h2>
@@ -195,13 +195,13 @@ class Home extends Component {
                     {this.state.hotprods.length > 0 && (
                         <div>
                             <h2 style={{
-                                fontSize: '28px',
+                                fontSize: '24px',
                                 fontWeight: 'bold',
-                                marginBottom: '20px',
+                                marginBottom: '16px',
                                 color: '#ff4d4f',
                                 textAlign: 'center',
                                 borderBottom: '2px solid #ff4d4f',
-                                paddingBottom: '10px'
+                                paddingBottom: '8px'
                             }}>
                                 🔥 HOT PRODUCTS
                             </h2>

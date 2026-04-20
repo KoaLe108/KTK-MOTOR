@@ -21,6 +21,8 @@ class Main extends Component {
                     style={{
                         padding: '24px',
                         background: '#f0f2f5',
+                        paddingLeft: '12px',
+                        paddingRight: '12px',
                     }}
                 >
                     <Routes>

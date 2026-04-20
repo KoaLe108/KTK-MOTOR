@@ -75,37 +75,48 @@ class MenuComponent extends Component {
                     justifyContent: 'space-between',
                     alignItems: 'center',
                     background: '#001529',
-                    paddingLeft: '50px',
-                    paddingRight: '50px',
+                    paddingLeft: '20px',
+                    paddingRight: '20px',
+                    minHeight: 'auto',
                     flexWrap: 'wrap',
-                    rowGap: '12px',
+                    rowGap: '8px',
                 }}
             >
                 <Menu
                     mode="horizontal"
                     items={menuItems}
                     style={{
-                        flex: 1,
-                        minWidth: 0,
+                        flex: '1 1 auto',
+                        minWidth: '200px',
                         background: 'transparent',
+                        border: 'none',
+                        overflow: 'hidden',
                     }}
                     theme="dark"
                 />
                 <form
                     className="header-search"
-                    style={{ display: 'flex', gap: '8px', marginRight: '20px', flexWrap: 'wrap', width: 'auto' }}
+                    style={{ 
+                        display: 'flex', 
+                        gap: '4px',
+                        marginRight: '0',
+                        flexWrap: 'wrap',
+                        width: 'auto',
+                        minWidth: '0'
+                    }}
                     onSubmit={(e) => this.btnSearchClick(e)}
                 >
                     <Input
                         placeholder="Enter keyword"
                         value={this.state.txtKeyword}
                         onChange={(e) => this.setState({ txtKeyword: e.target.value })}
-                        style={{ width: '200px' }}
+                        style={{ width: '150px', minWidth: '100px' }}
                     />
                     <Button
                         type="primary"
                         icon={<SearchOutlined />}
                         htmlType="submit"
+                        style={{ whiteSpace: 'nowrap' }}
                     >
                         SEARCH
                     </Button>
@@ -118,27 +129,33 @@ class MenuComponent extends Component {
                         placement="bottomRight"
                         trigger={['click']}
                     >
-                        <Button type="primary" icon={<UserOutlined />}>
+                        <Button type="primary" icon={<UserOutlined />} style={{ whiteSpace: 'nowrap' }}>
                             {this.context.customer?.name || 'User'}
                         </Button>
                     </Dropdown>
                 ) : (
-                    <div className="header-auth" style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                    <div className="header-auth" style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
                         <Button
                             onClick={() => this.props.navigate('/active')}
                             type="default"
+                            size="small"
+                            style={{ whiteSpace: 'nowrap' }}
                         >
                             Activate
                         </Button>
                         <Button 
                             onClick={() => this.props.navigate('/login')}
                             type="default"
+                            size="small"
+                            style={{ whiteSpace: 'nowrap' }}
                         >
                             Login
                         </Button>
                         <Button 
                             onClick={() => this.props.navigate('/signup')}
                             type="primary"
+                            size="small"
+                            style={{ whiteSpace: 'nowrap' }}
                         >
                             Sign Up
                         </Button>

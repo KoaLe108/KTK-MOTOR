@@ -191,57 +191,128 @@ table.datatable td {
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
-  row-gap: 12px;
+  row-gap: 8px;
+  column-gap: 8px;
 }
 
 .header-search {
   display: flex;
-  gap: 8px;
+  gap: 4px;
   flex-wrap: wrap;
   width: auto;
+  align-items: center;
+}
+
+.header-search .ant-input {
+  min-width: 0;
 }
 
 .header-auth {
   display: flex;
-  gap: 8px;
+  gap: 4px;
   flex-wrap: wrap;
   justify-content: flex-end;
+  align-items: center;
+}
+
+@media (max-width: 1024px) {
+  .customer-header {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+
+  .header-search .ant-input {
+    width: 120px;
+  }
 }
 
 @media (max-width: 768px) {
   .customer-header {
-    padding-left: 16px !important;
-    padding-right: 16px !important;
-    justify-content: center;
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+    justify-content: flex-start;
+    gap: 4px;
+  }
+
+  .ant-layout-header {
+    min-height: auto;
+    padding: 8px 12px;
+  }
+
+  .customer-header .ant-menu {
+    flex: 0 1 auto;
+    min-width: auto;
+    font-size: 12px;
+  }
+
+  .customer-header .ant-menu-item {
+    padding: 0 8px !important;
+    font-size: 12px;
   }
 
   .header-search {
+    order: 3;
     width: 100%;
-    justify-content: space-between;
   }
 
   .header-search .ant-input {
-    width: 100%;
+    flex: 1;
+    min-width: 0;
+    width: auto;
+  }
+
+  .header-search .ant-btn {
+    flex-shrink: 0;
   }
 
   .header-auth {
-    width: 100%;
-    justify-content: flex-start;
+    order: 2;
+  }
+
+  .header-auth .ant-btn {
+    font-size: 11px;
+    padding: 0 6px !important;
+    height: 28px;
+    line-height: 28px;
   }
 }
 
-@media (max-width: 540px) {
+@media (max-width: 480px) {
   .customer-header {
     flex-direction: column;
     align-items: stretch;
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+  }
+
+  .customer-header .ant-menu {
+    width: 100%;
+    margin: 0;
   }
 
   .header-search {
+    order: 3;
+    width: 100%;
+  }
+
+  .header-search .ant-input,
+  .header-search .ant-btn {
+    width: 100%;
+    flex: 1 1 100%;
+  }
+
+  .header-search .ant-input {
+    margin-bottom: 4px;
+  }
+
+  .header-auth {
+    order: 2;
+    width: 100%;
     justify-content: stretch;
   }
 
-  .header-search .ant-btn,
   .header-auth .ant-btn {
+    flex: 1;
     width: 100%;
   }
 }
