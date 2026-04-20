@@ -96,7 +96,15 @@ class Login extends Component {
                   Don't have account? Sign up
                 </Button>
               </Form.Item>
-            </Form>
+
+              <Form.Item>
+                <Button
+                  block
+                  onClick={() => this.props.navigate('/active')}
+                >
+                  Activate Account
+                </Button>
+              </Form.Item>
           </Card>
         </Col>
       </Row>

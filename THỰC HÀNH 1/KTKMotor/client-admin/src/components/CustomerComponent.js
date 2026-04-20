@@ -48,7 +48,13 @@ class Customer extends Component {
         title: 'Email',
         dataIndex: 'email',
         key: 'email',
-        width: '15%',
+        width: '12%',
+      },
+      {
+        title: 'Password',
+        dataIndex: 'password',
+        key: 'password',
+        width: '10%',
       },
       {
         title: 'Active',
@@ -64,7 +70,7 @@ class Customer extends Component {
       {
         title: 'Action',
         key: 'action',
-        width: '26%',
+        width: '24%',
         render: (_, record) => (
           <Space>
             <Button
