@@ -1,7 +1,7 @@
 import axios from 'axios';
 import React, { Component } from 'react';
 import { Table, Button, Card, Tag, Space, Modal } from 'antd';
-import { MailOutlined, LockOutlined } from '@ant-design/icons';
+import { MailOutlined, LockOutlined, CheckCircleOutlined } from '@ant-design/icons';
 import MyContext from '../contexts/MyContext';
 
 class Customer extends Component {
@@ -270,6 +270,10 @@ class Customer extends Component {
     this.apiPutCustomerDeactive(item._id, item.token);
   }
 
+  lnkActiveClick(item) {
+    this.apiPutCustomerActive(item._id, item.token);
+  }
+
   lnkEmailClick(item) {
     this.apiGetCustomerSendmail(item._id);
   }
@@ -299,6 +303,16 @@ class Customer extends Component {
     const body = { token: token };
     const config = { headers: { 'x-access-token': this.context.token } };
     axios.put('/api/admin/customers/deactive/' + id, body, config).then((res) => {
+      if (res.data) {
+        this.apiGetCustomers();
+      }
+    });
+  }
+
+  apiPutCustomerActive(id, token) {
+    const body = { token: token };
+    const config = { headers: { 'x-access-token': this.context.token } };
+    axios.put('/api/admin/customers/active/' + id, body, config).then((res) => {
       if (res.data) {
         this.apiGetCustomers();
       }

@@ -140,6 +140,20 @@ router.put('/customers/deactive/:id', JwtUtil.checkToken, async function (req, r
     res.status(500).json({ success: false, message: 'Server error', error: error.message });
   }
 });
+router.put('/customers/active/:id', JwtUtil.checkToken, async function (req, res) {
+  try {
+    const _id = req.params.id;
+    const token = req.body.token;
+    
+    // Gọi hàm active từ CustomerDAO với tham số active = 1 (activate)
+    const result = await CustomerDAO.active(_id, token, 1);
+    
+    res.json(result);
+  } catch (error) {
+    console.error('Activate customer error:', error);
+    res.status(500).json({ success: false, message: 'Server error', error: error.message });
+  }
+});
 router.get('/customers/sendmail/:id', JwtUtil.checkToken, async function (req, res) {
   const _id = req.params.id;
   const cust = await CustomerDAO.selectByID(_id);

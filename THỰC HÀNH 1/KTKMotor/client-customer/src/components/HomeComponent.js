@@ -153,9 +153,22 @@ class Home extends Component {
             </Col>
         ));
 
+        const isLoggedIn = !!this.context.token;
+
         return (
             <Spin spinning={this.state.loading}>
                 <div style={{ padding: '20px' }}>
+                    {!isLoggedIn && (
+                        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
+                            <Button
+                                type="primary"
+                                size="large"
+                                onClick={() => this.props.navigate('/active')}
+                            >
+                                Activate Account
+                            </Button>
+                        </div>
+                    )}
                     {/* NEW PRODUCTS SECTION */}
                     <div style={{ marginBottom: '40px' }}>
                         <h2 style={{

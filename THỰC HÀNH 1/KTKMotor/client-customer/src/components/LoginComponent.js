@@ -53,7 +53,7 @@ class Login extends Component {
                 username: 'sonkk',
                 password: '123'
               }}
-            >
+            />
               <Form.Item
                 name="username"
                 rules={[{ required: true, message: 'Please enter username' }]}
