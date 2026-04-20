@@ -120,6 +120,12 @@ class MenuComponent extends Component {
                     </Dropdown>
                 ) : (
                     <div style={{ display: 'flex', gap: '8px' }}>
+                        <Button
+                            onClick={() => this.props.navigate('/active')}
+                            type="default"
+                        >
+                            Activate
+                        </Button>
                         <Button 
                             onClick={() => this.props.navigate('/login')}
                             type="default"
