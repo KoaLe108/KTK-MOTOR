@@ -53,7 +53,7 @@ class Login extends Component {
                 username: 'sonkk',
                 password: '123'
               }}
-            />
+            >
               <Form.Item
                 name="username"
                 rules={[{ required: true, message: 'Please enter username' }]}
@@ -105,6 +105,7 @@ class Login extends Component {
                   Activate Account
                 </Button>
               </Form.Item>
+            </Form>
           </Card>
         </Col>
       </Row>
