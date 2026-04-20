@@ -69,6 +69,7 @@ class MenuComponent extends Component {
 
         return (
             <Layout.Header
+                className="customer-header"
                 style={{
                     display: 'flex',
                     justifyContent: 'space-between',
@@ -76,6 +77,8 @@ class MenuComponent extends Component {
                     background: '#001529',
                     paddingLeft: '50px',
                     paddingRight: '50px',
+                    flexWrap: 'wrap',
+                    rowGap: '12px',
                 }}
             >
                 <Menu
@@ -89,7 +92,8 @@ class MenuComponent extends Component {
                     theme="dark"
                 />
                 <form
-                    style={{ display: 'flex', gap: '8px', marginRight: '20px' }}
+                    className="header-search"
+                    style={{ display: 'flex', gap: '8px', marginRight: '20px', flexWrap: 'wrap', width: 'auto' }}
                     onSubmit={(e) => this.btnSearchClick(e)}
                 >
                     <Input
@@ -119,7 +123,7 @@ class MenuComponent extends Component {
                         </Button>
                     </Dropdown>
                 ) : (
-                    <div style={{ display: 'flex', gap: '8px' }}>
+                    <div className="header-auth" style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                         <Button
                             onClick={() => this.props.navigate('/active')}
                             type="default"
