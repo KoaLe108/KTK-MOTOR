@@ -193,6 +193,7 @@ table.datatable td {
   flex-wrap: wrap;
   row-gap: 8px;
   column-gap: 8px;
+  pointer-events: auto;
 }
 
 .header-search {
@@ -201,10 +202,17 @@ table.datatable td {
   flex-wrap: wrap;
   width: auto;
   align-items: center;
+  pointer-events: auto;
 }
 
 .header-search .ant-input {
   min-width: 0;
+  pointer-events: auto;
+}
+
+.header-search .ant-btn {
+  pointer-events: auto;
+  cursor: pointer;
 }
 
 .header-auth {
@@ -213,6 +221,14 @@ table.datatable td {
   flex-wrap: wrap;
   justify-content: flex-end;
   align-items: center;
+  pointer-events: auto;
+  z-index: 10;
+}
+
+.header-auth .ant-btn {
+  pointer-events: auto;
+  cursor: pointer;
+  z-index: 10;
 }
 
 @media (max-width: 1024px) {
@@ -237,36 +253,44 @@ table.datatable td {
   .ant-layout-header {
     min-height: auto;
     padding: 8px 12px;
+    pointer-events: auto;
   }
 
   .customer-header .ant-menu {
     flex: 0 1 auto;
     min-width: auto;
     font-size: 12px;
+    pointer-events: auto;
   }
 
   .customer-header .ant-menu-item {
     padding: 0 8px !important;
     font-size: 12px;
+    pointer-events: auto;
   }
 
   .header-search {
     order: 3;
     width: 100%;
+    pointer-events: auto;
   }
 
   .header-search .ant-input {
     flex: 1;
     min-width: 0;
     width: auto;
+    pointer-events: auto;
   }
 
   .header-search .ant-btn {
     flex-shrink: 0;
+    pointer-events: auto;
   }
 
   .header-auth {
     order: 2;
+    pointer-events: auto;
+    z-index: 10;
   }
 
   .header-auth .ant-btn {
@@ -274,6 +298,8 @@ table.datatable td {
     padding: 0 6px !important;
     height: 28px;
     line-height: 28px;
+    pointer-events: auto;
+    z-index: 10;
   }
 }
 
@@ -288,31 +314,39 @@ table.datatable td {
   .customer-header .ant-menu {
     width: 100%;
     margin: 0;
+    pointer-events: auto;
   }
 
   .header-search {
     order: 3;
     width: 100%;
+    pointer-events: auto;
   }
 
   .header-search .ant-input,
   .header-search .ant-btn {
     width: 100%;
     flex: 1 1 100%;
+    pointer-events: auto;
   }
 
   .header-search .ant-input {
     margin-bottom: 4px;
+    pointer-events: auto;
   }
 
   .header-auth {
     order: 2;
     width: 100%;
     justify-content: stretch;
+    pointer-events: auto;
+    z-index: 10;
   }
 
   .header-auth .ant-btn {
     flex: 1;
     width: 100%;
+    pointer-events: auto;
+    z-index: 10;
   }
 }

@@ -86,43 +86,16 @@ class MenuComponent extends Component {
                     mode="horizontal"
                     items={menuItems}
                     style={{
-                        flex: '1 1 auto',
-                        minWidth: '200px',
+                        flex: '1 1 100px',
+                        minWidth: '100px',
                         background: 'transparent',
                         border: 'none',
-                        overflow: 'hidden',
+                        overflow: 'visible',
                     }}
                     theme="dark"
                 />
-                <form
-                    className="header-search"
-                    style={{ 
-                        display: 'flex', 
-                        gap: '4px',
-                        marginRight: '0',
-                        flexWrap: 'wrap',
-                        width: 'auto',
-                        minWidth: '0'
-                    }}
-                    onSubmit={(e) => this.btnSearchClick(e)}
-                >
-                    <Input
-                        placeholder="Enter keyword"
-                        value={this.state.txtKeyword}
-                        onChange={(e) => this.setState({ txtKeyword: e.target.value })}
-                        style={{ width: '150px', minWidth: '100px' }}
-                    />
-                    <Button
-                        type="primary"
-                        icon={<SearchOutlined />}
-                        htmlType="submit"
-                        style={{ whiteSpace: 'nowrap' }}
-                    >
-                        SEARCH
-                    </Button>
-                </form>
 
-                {/* Auth Section */}
+                {/* Auth Section - prioritize visibility */}
                 {this.context.token ? (
                     <Dropdown
                         menu={{ items: userMenuItems }}
@@ -134,7 +107,7 @@ class MenuComponent extends Component {
                         </Button>
                     </Dropdown>
                 ) : (
-                    <div className="header-auth" style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                    <div className="header-auth" style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', justifyContent: 'flex-end', order: 1 }}>
                         <Button
                             onClick={() => this.props.navigate('/active')}
                             type="default"
@@ -161,6 +134,36 @@ class MenuComponent extends Component {
                         </Button>
                     </div>
                 )}
+
+                <form
+                    className="header-search"
+                    style={{ 
+                        display: 'flex', 
+                        gap: '4px',
+                        marginRight: '0',
+                        flexWrap: 'wrap',
+                        width: 'auto',
+                        minWidth: '0',
+                        order: 2,
+                        zIndex: 1
+                    }}
+                    onSubmit={(e) => this.btnSearchClick(e)}
+                >
+                    <Input
+                        placeholder="Enter keyword"
+                        value={this.state.txtKeyword}
+                        onChange={(e) => this.setState({ txtKeyword: e.target.value })}
+                        style={{ width: '150px', minWidth: '100px' }}
+                    />
+                    <Button
+                        type="primary"
+                        icon={<SearchOutlined />}
+                        htmlType="submit"
+                        style={{ whiteSpace: 'nowrap' }}
+                    >
+                        SEARCH
+                    </Button>
+                </form>
             </Layout.Header>
         );
     }
