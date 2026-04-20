@@ -95,7 +95,7 @@ class MenuComponent extends Component {
                     theme="dark"
                 />
 
-                {/* Auth Section - prioritize visibility */}
+                {/* Auth Section - moved to Home component */}
                 {this.context.token ? (
                     <Dropdown
                         menu={{ items: userMenuItems }}
@@ -106,39 +106,12 @@ class MenuComponent extends Component {
                             {this.context.customer?.name || 'User'}
                         </Button>
                     </Dropdown>
-                ) : (
-                    <div className="header-auth" style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', justifyContent: 'flex-end', order: 1 }}>
-                        <Button
-                            onClick={() => this.props.navigate('/active')}
-                            type="default"
-                            size="small"
-                            style={{ whiteSpace: 'nowrap' }}
-                        >
-                            Activate
-                        </Button>
-                        <Button 
-                            onClick={() => this.props.navigate('/login')}
-                            type="default"
-                            size="small"
-                            style={{ whiteSpace: 'nowrap' }}
-                        >
-                            Login
-                        </Button>
-                        <Button 
-                            onClick={() => this.props.navigate('/signup')}
-                            type="primary"
-                            size="small"
-                            style={{ whiteSpace: 'nowrap' }}
-                        >
-                            Sign Up
-                        </Button>
-                    </div>
-                )}
+                ) : null}
 
                 <form
                     className="header-search"
-                    style={{ 
-                        display: 'flex', 
+                    style={{
+                        display: 'flex',
                         gap: '4px',
                         marginRight: '0',
                         flexWrap: 'wrap',

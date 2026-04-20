@@ -159,14 +159,35 @@ class Home extends Component {
             <Spin spinning={this.state.loading}>
                 <div style={{ padding: '12px' }}>
                     {!isLoggedIn && (
-                        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
-                            <Button
-                                type="primary"
-                                size="large"
-                                onClick={() => this.props.navigate('/active')}
-                            >
-                                Activate Account
-                            </Button>
+                        <div className="auth-section">
+                            <div className="auth-content">
+                                <h3>Welcome to KTK Motor Store</h3>
+                                <p>Please login or create an account to start shopping</p>
+                                <div className="auth-buttons">
+                                    <Button
+                                        type="primary"
+                                        size="large"
+                                        onClick={() => this.props.navigate('/login')}
+                                    >
+                                        Login
+                                    </Button>
+                                    <Button
+                                        type="default"
+                                        size="large"
+                                        onClick={() => this.props.navigate('/signup')}
+                                    >
+                                        Sign Up
+                                    </Button>
+                                    <Button
+                                        type="link"
+                                        size="large"
+                                        onClick={() => this.props.navigate('/active')}
+                                        style={{ color: '#1890ff' }}
+                                    >
+                                        Activate Account
+                                    </Button>
+                                </div>
+                            </div>
                         </div>
                     )}
                     {/* NEW PRODUCTS SECTION */}
